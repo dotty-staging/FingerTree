@@ -14,6 +14,12 @@ The current implementation is a rewrite of previous versions. It tries to combin
 
 This builds with Scala 2.9.1 and sbt 0.11.2. Standard targets are `compile`, `package`, `doc`, `console`, `test`, `publish-local`.
 
+## linking to FingerTree
+
+The following dependency is necessary:
+
+    "de.sciss" %% "fingertree" % "0.20"
+
 ### using
 
 You can either implement your own data structure by wrapping a plain `FingerTree` instance. Trait `FingerTreeLike` can be used as a basis, it has two abstract methods `tree` and `wrap` which would need to be implemented.
