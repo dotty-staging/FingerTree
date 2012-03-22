@@ -216,14 +216,14 @@ object FingerTree {
       private[fingertree] def find1( pred: V => Boolean, init: V )( implicit m: Measure[ A, V ]) : (V, A) = {
          val vPrefix = m |+| (init, prefix.measure)
          if( pred( vPrefix )) {  // found in prefix
-            (init, prefix.find1( pred, init ))
+            prefix.find1( pred, init )
          } else {
             val vTree = m |+| (vPrefix, tree.measure)
             if( pred( vTree )) { // found in middle
                val (vTreeLeft, xs) = tree.find1( pred, vPrefix )
-               (vTreeLeft, xs.find1( pred, vTreeLeft ))
+               xs.find1( pred, vTreeLeft )
             } else {             // in suffix
-               (vTree, suffix.find1( pred, vTree ))
+               suffix.find1( pred, vTree )
             }
          }
       }
@@ -340,7 +340,7 @@ object FingerTree {
       def +:[ A1 >: A ]( b: A1 )( implicit m: Measure[ A1, V ]) : Digit[ V, A1 ]
       def :+[ A1 >: A ]( b: A1 )( implicit m: Measure[ A1, V ]) : Digit[ V, A1 ]
 
-      def find1( pred: V => Boolean, init: V )( implicit m: Measure[ A, V ]) : A
+      def find1(  pred: V => Boolean, init: V )( implicit m: Measure[ A, V ]) : (V, A)
       def split1( pred: V => Boolean, init: V )( implicit m: Measure[ A, V ]) : (MaybeDigit[ V, A ], A, MaybeDigit[ V, A ])
 
 //      def toTree( implicit m: Measure[ A, V ]) : Tree
@@ -363,7 +363,7 @@ object FingerTree {
       def +:[ A1 >: A ]( b: A1 )( implicit m: Measure[ A1, V ]) : Digit[ V, A1 ] = Two( m |+| (m( b ), measure), b, a1 )
       def :+[ A1 >: A ]( b: A1 )( implicit m: Measure[ A1, V ]) : Digit[ V, A1 ] = Two( m |+| (measure, m( b )), a1, b )
 
-      def find1( pred: V => Boolean, init: V )( implicit m: Measure[ A, V ]) : A = a1
+      def find1( pred: V => Boolean, init: V )( implicit m: Measure[ A, V ]) : (V, A) = (init, a1)
 
       def split1( pred: V => Boolean, init: V )( implicit m: Measure[ A, V ]) : (MaybeDigit[ V, A ], A, MaybeDigit[ V, A ]) = {
          val e = Zero[ V ]()
@@ -392,8 +392,10 @@ object FingerTree {
       def +:[ A1 >: A ]( b: A1 )( implicit m: Measure[ A1, V ]) : Digit[ V, A1 ] = Three( m |+| (m( b ), measure), b, a1, a2 )
       def :+[ A1 >: A ]( b: A1 )( implicit m: Measure[ A1, V ]) : Digit[ V, A1 ] = Three( m |+| (measure, m( b )), a1, a2, b )
 
-      def find1( pred: V => Boolean, init: V )( implicit m: Measure[ A, V ]) : A =
-         if( pred( m |+| (init, m( a1 )))) a1 else a2
+      def find1( pred: V => Boolean, init: V )( implicit m: Measure[ A, V ]) : (V, A) = {
+         val v1 = m |+| (init, m( a1 ))
+         if( pred( v1 )) (init, a1) else (v1, a2)
+      }
 
       def split1( pred: V => Boolean, init: V )( implicit m: Measure[ A, V ]) : (MaybeDigit[ V, A ], A, MaybeDigit[ V, A ]) = {
          val va1  = m( a1 )
@@ -433,9 +435,12 @@ object FingerTree {
       def :+[ A1 >: A ]( b: A1 )( implicit m: Measure[ A1, V ]) : Digit[ V, A1 ] =
          Four( m |+| (measure, m( b )), a1, a2, a3, b )
 
-      def find1( pred: V => Boolean, init: V )( implicit m: Measure[ A, V ]) : A = {
+      def find1( pred: V => Boolean, init: V )( implicit m: Measure[ A, V ]) : (V, A) = {
          val v1 = m |+| (init, m( a1 ))
-         if( pred( v1 )) a1 else if( pred( m |+| (v1, m( a2 )))) a2 else a3
+         if( pred( v1 )) (init, a1) else {
+            val v12 = m |+| (v1, m( a2 ))
+            if( pred( v12 )) (v1, a2) else (v12, a3)
+         }
       }
 
       def split1( pred: V => Boolean, init: V )( implicit m: Measure[ A, V ]) : (MaybeDigit[ V, A ], A, MaybeDigit[ V, A ]) = {
@@ -480,11 +485,14 @@ object FingerTree {
       def :+[ A1 >: A ]( b: A1 )( implicit m: Measure[ A1, V ]) =
          throw new UnsupportedOperationException( ":+ on digit four" )
 
-      def find1( pred: V => Boolean, init: V )( implicit m: Measure[ A, V ]) : A = {
+      def find1( pred: V => Boolean, init: V )( implicit m: Measure[ A, V ]) : (V, A) = {
          val v1 = m |+| (init, m( a1 ))
-         if( pred( v1 )) a1 else {
+         if( pred( v1 )) (init, a1) else {
             val v12 = m |+| (v1, m( a2 ))
-            if( pred( v12 )) a2 else if( pred( m |+| (v12, m( a3 )))) a3 else a4
+            if( pred( v12 )) (v1, a2) else {
+               val v123 = m |+| (v12, m( a3 ))
+               if( pred( v123 )) (v12, a3) else (v123, a4)
+            }
          }
       }
 
