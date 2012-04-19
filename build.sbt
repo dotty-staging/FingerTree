@@ -10,14 +10,14 @@ homepage := Some( url( "https://github.com/Sciss/FingerTree" ))
 
 licenses := Seq( "GPL v2+" -> url( "http://www.gnu.org/licenses/gpl-2.0.txt" ))
 
-scalaVersion := "2.9.1"
+scalaVersion := "2.9.2"
 
 scalacOptions ++= Seq( "-deprecation", "-unchecked" )
 
 initialCommands in console := """import de.sciss.fingertree._"""
 
 libraryDependencies ++= Seq(
-   "org.scalatest" %% "scalatest" % "1.7.1" % "test"
+   "org.scalatest" %% "scalatest" % "1.7.2" % "test"
 )
 
 retrieveManaged := true
