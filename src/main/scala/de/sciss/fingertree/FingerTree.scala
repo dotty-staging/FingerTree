@@ -30,9 +30,9 @@ package de.sciss.fingertree
  */
 object FingerTree {
    val name          = "FingerTree"
-   val version       = 0.20
+   val version       = 0.21
    val copyright     = "(C)opyright 2011-2012 Hanns Holger Rutz"
-   val isSnapshot    = false
+   val isSnapshot    = true
 
    def versionString = {
       val s = (version + 0.001).toString.substring( 0, 4 )
@@ -41,7 +41,11 @@ object FingerTree {
 
    def empty[ V, A ]( implicit m: Measure[ A, V ]) : FingerTree[ V, A ] = new Empty[ V ]( m.zero )
    def apply[ V, A ]( elems: A* )( implicit m: Measure[ A, V ]) : FingerTree[ V, A ] = {
-      // TODO make this more efficient
+      // TODO make this more efficient?
+      // Maybe not worth the effort, the best we could do is
+      // improve O(N logN) to become O(N).
+      // However, it might be good for small trees of a few elements, saving some constant factor.
+      // (We could overload apply with one, two, three and four element versions)
       var res = empty[ V, A ]
       elems.foreach( res :+= _ )
       res
@@ -240,12 +244,14 @@ object FingerTree {
 
       def toList : List[ A ] = iterator.toList
 
-      // TODO XXX this certainly is not lazy. Needs fixing
-      def iterator : Iterator[ A ] = prefix.iterator ++ (tree.iterator flatMap { _.toList.iterator }) ++ suffix.iterator
+      def iterator : Iterator[ A ] = {
+        // Iterators compose nicely, ++ and flatMap are still lazy 
+        prefix.iterator ++ tree.iterator.flatMap( _.iterator ) ++ suffix.iterator
+      }
 
       override def toString = "(" + prefix + ", " + tree + ", " + suffix + ")"
    }
-
+   
    final private case class Empty[ V ]( measure: V ) extends FingerTree[ V, Nothing ] {
       def isEmpty = true
 
