@@ -16,8 +16,10 @@ scalacOptions ++= Seq( "-deprecation", "-unchecked" )
 
 initialCommands in console := """import de.sciss.fingertree._"""
 
+resolvers += "Sonatype OSS Releases" at "https://oss.sonatype.org/content/groups/public"
+
 libraryDependencies ++= Seq(
-   "org.scalatest" % "scalatest_2.10.0-M5" % "1.9-2.10.0-M5-B2" % "test"
+   "org.scalatest" %% "scalatest" % "1.9-2.10.0-M6-B1" % "test"
 )
 
 retrieveManaged := true
