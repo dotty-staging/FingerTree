@@ -10,7 +10,7 @@ homepage := Some( url( "https://github.com/Sciss/FingerTree" ))
 
 licenses := Seq( "GPL v2+" -> url( "http://www.gnu.org/licenses/gpl-2.0.txt" ))
 
-scalaVersion := "2.10.0-M6"
+scalaVersion := "2.9.2"
 
 crossScalaVersions := Seq( "2.10.0-M6", "2.9.2" )
 
@@ -20,9 +20,13 @@ initialCommands in console := """import de.sciss.fingertree._"""
 
 resolvers += "Sonatype OSS Releases" at "https://oss.sonatype.org/content/groups/public"
 
-libraryDependencies ++= Seq(
-   "org.scalatest" %% "scalatest" % "1.9-2.10.0-M6-B2" % "test"
-)
+libraryDependencies <+= scalaVersion { sv =>
+   val v = sv match {
+      case "2.10.0-M6" => "1.9-2.10.0-M6-B2"
+      case _ => "1.8"
+   }
+   "org.scalatest" %% "scalatest" % v % "test"
+}
 
 retrieveManaged := true
 
