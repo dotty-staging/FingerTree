@@ -12,13 +12,13 @@ The current implementation is a rewrite of previous versions. It tries to combin
 
 ### building
 
-This builds with Scala 2.9.2 and sbt 0.11.2. Standard targets are `compile`, `package`, `doc`, `console`, `test`, `publish-local`.
+This builds with Scala 2.9.2 and sbt 0.12. Standard targets are `compile`, `package`, `doc`, `console`, `test`, `publish-local`.
 
 ## linking to FingerTree
 
 The following dependency is necessary:
 
-    "de.sciss" %% "fingertree" % "0.21-SNAPSHOT"
+    "de.sciss" %% "fingertree" % "0.21"
 
 ### using
 
@@ -34,7 +34,6 @@ Future versions will provide more ready-made structures, such as ordered sequenc
 
  - concatenation of trees
  - efficient bulk loading
- - the iterator looks broken (non-lazy)
 
 ### creating an IntelliJ IDEA project
 
@@ -44,7 +43,4 @@ To develop the sources of FingerTree in IntelliJ IDEA, if you haven't globally i
     
     addSbtPlugin("com.github.mpeltonen" % "sbt-idea" % "1.0.0")
 
-Then to create the IDEA project, run the following two commands from the xsbt shell:
-
-    > set ideaProjectName := "FingerTree"
-    > gen-idea
+Then to create the IDEA project, run `sbt gen-idea`.
