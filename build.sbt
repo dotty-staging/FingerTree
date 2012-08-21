@@ -1,6 +1,6 @@
 name := "FingerTree"
 
-version := "0.21"
+version := "1.0.0"
 
 organization := "de.sciss"
 
@@ -12,7 +12,7 @@ licenses := Seq( "GPL v2+" -> url( "http://www.gnu.org/licenses/gpl-2.0.txt" ))
 
 scalaVersion := "2.9.2"
 
-crossScalaVersions := Seq( "2.10.0-M6", "2.9.2" )
+// crossScalaVersions := Seq( "2.10.0-M6", "2.9.2" )
 
 scalacOptions ++= Seq( "-deprecation", "-unchecked" )
 
@@ -20,15 +20,28 @@ initialCommands in console := """import de.sciss.fingertree._"""
 
 resolvers += "Sonatype OSS Releases" at "https://oss.sonatype.org/content/groups/public"
 
-libraryDependencies <+= scalaVersion { sv =>
+libraryDependencies in ThisBuild <+= scalaVersion { sv =>
    val v = sv match {
-      case "2.10.0-M6" => "1.9-2.10.0-M6-B2"
-      case _ => "1.8"
+      case "2.10.0-M7" => "org.scalatest" % "scalatest_2.10.0-M6" % "1.9-2.10.0-M6-B2"
+      case _ => "org.scalatest" %% "scalatest" % "1.8"
    }
-   "org.scalatest" %% "scalatest" % v % "test"
+   v % "test"
 }
 
 retrieveManaged := true
+
+// ---- build info ----
+
+buildInfoSettings
+
+sourceGenerators in Compile <+= buildInfo
+
+buildInfoKeys := Seq( name, organization, version, scalaVersion, description,
+   BuildInfoKey.map( homepage ) { case (k, opt) => k -> opt.get },
+   BuildInfoKey.map( licenses ) { case (_, Seq( (lic, _) )) => "license" -> lic }
+)
+
+buildInfoPackage := "de.sciss.fingertree"
 
 // ---- publishing ----
 

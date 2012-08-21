@@ -29,15 +29,15 @@ package de.sciss.fingertree
  * Variant of a finger tree which adds a measure.
  */
 object FingerTree {
-   val name          = "FingerTree"
-   val version       = 0.21
-   val copyright     = "(C)opyright 2011-2012 Hanns Holger Rutz"
-   val isSnapshot    = false
-
-   def versionString = {
-      val s = (version + 0.001).toString.substring( 0, 4 )
-      if( isSnapshot ) s + "-SNAPSHOT" else s
-   }
+//   val name          = "FingerTree"
+//   val version       = 0.21
+//   val copyright     = "(C)opyright 2011-2012 Hanns Holger Rutz"
+//   val isSnapshot    = false
+//
+//   def versionString = {
+//      val s = (version + 0.001).toString.substring( 0, 4 )
+//      if( isSnapshot ) s + "-SNAPSHOT" else s
+//   }
 
    def empty[ V, A ]( implicit m: Measure[ A, V ]) : FingerTree[ V, A ] = new Empty[ V ]( m.zero )
    def apply[ V, A ]( elems: A* )( implicit m: Measure[ A, V ]) : FingerTree[ V, A ] = {
