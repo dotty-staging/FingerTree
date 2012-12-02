@@ -1,7 +1,7 @@
 package de.sciss.fingertree
 
 import org.scalatest.{FeatureSpec, GivenWhenThen}
-import collection.immutable.{IndexedSeq => IIdxSeq}
+import collection.immutable.{Vector => IIdxSeq}  // until https://issues.scala-lang.org/browse/SI-6150 is fixed :-/
 
 /**
  * To run only this test:
