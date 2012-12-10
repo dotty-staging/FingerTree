@@ -34,7 +34,10 @@ object IndexedSeq {
    private final class Impl[ A ]( protected val tree: FingerTree[ Int, A ]) extends IndexedSeq[ A ] {
       protected def m : Measure[ A, Int ] = measure
       protected def wrap( tree: FingerTree[ Int, A ]) : IndexedSeq[ A ] = new Impl( tree )
-      protected def indexPred( i: Int ) = _ > i
+
+      protected def isSizeGtPred(   i: Int ) = _  > i
+      protected def isSizeLteqPred( i: Int ) = _ <= i
+//      protected def sizeMeasure( i: Int ) = i
 
       def size : Int = tree.measure
 

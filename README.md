@@ -18,7 +18,7 @@ This builds with Scala 2.9.2 and sbt 0.12. Standard targets are `compile`, `pack
 
 The following dependency is necessary:
 
-    "de.sciss" %% "fingertree" % "1.1.+"
+    "de.sciss" %% "fingertree" % "1.2.+"
 
 ### using
 

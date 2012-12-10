@@ -25,7 +25,10 @@ object IndexedSummedSeq {
                                         ( implicit protected val m: Measure[ Elem, (Int, Sum) ])
    extends IndexedSummedSeq[ Elem, Sum ] {
       protected def wrap( tree: FingerTree[ (Int, Sum), Elem ]) : IndexedSummedSeq[ Elem, Sum ] = new Impl( tree )
-      protected def indexPred( i: Int ) = _._1 > i
+
+      protected def isSizeGtPred(   i: Int ) = _._1 >  i
+      protected def isSizeLteqPred( i: Int ) = _._1 <= i
+//      protected def sizeMeasure( i: (Int, Sum) ) = i._1
 
       def size : Int = tree.measure._1
       def sum : Sum  = tree.measure._2

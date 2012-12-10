@@ -104,11 +104,11 @@ object FingerTree {
       }
 
       def takeWhile( pred: V => Boolean )( implicit m: Measure[ A, V ]) : Tree = {
-         if( pred( m( a ))) empty[ V, A ] else this
+         if( pred( m( a ))) this else empty[ V, A ]
       }
 
       def dropWhile( pred: V => Boolean )( implicit m: Measure[ A, V ]) : Tree = {
-         if( pred( m( a ))) this else empty[ V, A ]
+         if( pred( m( a ))) empty[ V, A ] else this
       }
 
       def split1( pred: V => Boolean )( implicit m: Measure[ A, V ]) : (Tree, A, Tree) = {
@@ -122,7 +122,7 @@ object FingerTree {
       }
 
       private[fingertree] def takeWhile1( pred: V => Boolean, init: V )( implicit m: Measure[ A, V ]) : (Tree, A) = {
-         (empty[ V, A ], a)
+         (empty[ V, A ], a)    // correct???
       }
 
       def find1( pred: V => Boolean )( implicit m: Measure[ A, V ]) : A = a
@@ -194,19 +194,19 @@ object FingerTree {
          }
 
       def takeWhile( pred: V => Boolean )( implicit m: Measure[ A, V ]) : Tree =
-         if( pred( measure )) {  // predicate turns true inside the tree
+         if( pred( measure )) {  // split point lies after the last element of this tree
+            this
+         } else {                // predicate turns true inside the tree
             val (left, _) = takeWhile1( pred, m.zero )
             left
-         } else {                // split point lies after the last element of this tree
-            this
          }
 
       def dropWhile( pred: V => Boolean )( implicit m: Measure[ A, V ]) : Tree =
-         if( pred( measure )) {  // predicate turns true inside the tree
+         if( pred( measure )) {  // split point lies after the last element of this tree
+            empty[ V, A ]
+         } else {                // predicate turns true inside the tree
             val (elem, right) = dropWhile1( pred, m.zero )
             (elem +: right)
-         } else {                // split point lies after the last element of this tree
-            empty[ V, A ]
          }
 
       private def deepLeft( pr: MaybeDigit[ V, A ], tr: FingerTree[ V, Digit[ V, A ]], sf: Digit[ V, A ])
@@ -257,37 +257,37 @@ object FingerTree {
 
       private[fingertree] def takeWhile1( pred: V => Boolean, init: V )( implicit m: Measure[ A, V ]) : (Tree, A) = {
          val vPrefix = m |+| (init, prefix.measure)
-         if( pred( vPrefix )) {  // found in prefix
-            val (l, x)           = prefix.takeWhile1( pred, init )
-            (l.toTree, x)
-         } else {
+         if( pred( vPrefix )) {
             val vTree = m |+| (vPrefix, tree.measure)
-            if( pred( vTree )) { // found in middle
+            if( pred( vTree )) { // in suffix
+               val (l, x)        = suffix.takeWhile1( pred, vTree )
+               (deepRight( prefix, tree, l), x)
+            } else {             // split point found in middle
                val (ml, xs)      = tree.takeWhile1( pred, vPrefix )
                val (l, x)        = xs.takeWhile1( pred, m |+| (vPrefix, ml.measure) )
                (deepRight( prefix, ml, l ), x)
-            } else {             // in suffix
-               val (l, x)        = suffix.takeWhile1( pred, vTree )
-               (deepRight( prefix, tree, l), x)
             }
+         } else {                // split point found in prefix
+            val (l, x)           = prefix.takeWhile1( pred, init )
+            (l.toTree, x)
          }
       }
 
       private[fingertree] def dropWhile1( pred: V => Boolean, init: V )( implicit m: Measure[ A, V ]) : (A, Tree) = {
          val vPrefix = m |+| (init, prefix.measure)
-         if( pred( vPrefix )) {  // found in prefix
-            val (x, r)           = prefix.dropWhile1( pred, init )
-            (x, deepLeft( r, tree, suffix ))
-         } else {
+         if( pred( vPrefix )) {
             val vTree = m |+| (vPrefix, tree.measure)
-            if( pred( vTree )) { // found in middle
-               val (ml, xs, mr)  = tree.split1( pred, vPrefix )
-               val (x, r)        = xs.dropWhile1( pred, m |+| (vPrefix, ml.measure) )
-               (x, deepLeft( r, mr, suffix ))
-            } else {             // in suffix
+            if( pred( vTree )) { // in suffix
                val (x, r)        = suffix.dropWhile1( pred, vTree )
                (x, r.toTree)
+            } else {             // split point found in middle
+               val (ml, xs, mr)  = tree.split1( pred.andThen(!_), vPrefix )   // XXX ugly
+               val (x, r)        = xs.dropWhile1( pred, m |+| (vPrefix, ml.measure) )
+               (x, deepLeft( r, mr, suffix ))
             }
+         } else {                // split point found in prefix
+            val (x, r)           = prefix.dropWhile1( pred, init )
+            (x, deepLeft( r, tree, suffix ))
          }
       }
 
@@ -462,11 +462,11 @@ object FingerTree {
       }
 
       def takeWhile1( pred: V => Boolean, init: V )( implicit m: Measure[ A, V ]) : (MaybeDigit[ V, A ], A) = {
-         (Zero[ V ](), a1)
+         (Zero[ V ](), a1) // correct???
       }
 
       def dropWhile1( pred: V => Boolean, init: V )( implicit m: Measure[ A, V ]) : (A, MaybeDigit[ V, A ]) = {
-         (a1, Zero[ V ]())
+         (a1, Zero[ V ]()) // correct???
       }
 
       def toTree( implicit m: Measure[ A, V ]) : Tree = Single( measure, a1 )
@@ -511,10 +511,10 @@ object FingerTree {
          val va1  = m( a1 )
          val v1   = m |+| (init, va1)
          if( pred( v1 )) {
+            (One( va1, a1 ), a2)    // (a1), a2
+         } else {
             val e = Zero[ V ]()
             (e, a1)                 // (), a1
-         } else {
-            (One( va1, a1 ), a2)    // (a1), a2
          }
       }
 
@@ -522,10 +522,10 @@ object FingerTree {
          val va1  = m( a1 )
          val v1   = m |+| (init, va1)
          if( pred( v1 )) {
-            (a1, One( m( a2 ), a2 ))   // a1, (a2)
-         } else {
             val e = Zero[ V ]()
             (a2, e)                    // a2, ()
+         } else {
+            (a1, One( m( a2 ), a2 ))   // a1, (a2)
          }
       }
 
@@ -580,15 +580,15 @@ object FingerTree {
       def takeWhile1( pred: V => Boolean, init: V )( implicit m: Measure[ A, V ]) : (MaybeDigit[ V, A ], A) = {
          val va1  = m( a1 )
          val v1   = m |+| (init, va1)
-         if( pred( v1 )) {                         // (), a1
-            (Zero[ V ](), a1)
-         } else {
+         if( pred( v1 )) {
             val va2 = m( a2 )
-            if( pred( m |+| (v1, va2) )) {         // (a1), a2
-               (One( va1, a1 ), a2)
-            } else {                               // (a1, a2), a3
-               (Two( m |+| (va1, va2), a1, a2 ), a3)
+            if( pred( m |+| (v1, va2) )) {
+               (Two( m |+| (va1, va2), a1, a2 ), a3)  // (a1, a2), a3
+            } else {
+               (One( va1, a1 ), a2)                   // (a1), a2
             }
+         } else {                                     // (), a1
+            (Zero[ V ](), a1)
          }
       }
 
@@ -596,12 +596,14 @@ object FingerTree {
          val va1  = m( a1 )
          val va2  = m( a2 )
          val v1   = m |+| (init, va1)
-         if( pred( v1 )) {                      // a1, (a2, a3)
-            (a1, Two( m |+| (va2, m( a3 )), a2, a3 ))
-         } else if( pred( m |+| (v1, va2) )) {  // a2, (a3)
-            (a2, One( m( a3 ), a3 ))
-         } else {                               // a3, ()
-            (a3, Zero[ V ]())
+         if( pred( v1 )) {
+            if( pred( m |+| (v1, va2) )) {
+               (a3, Zero[ V ]())                         // a3, ()
+            } else {
+               (a2, One( m( a3 ), a3 ))                  // a2, (a3)
+            }
+         } else {
+            (a1, Two( m |+| (va2, m( a3 )), a2, a3 ))    // a1, (a2, a3)
          }
       }
 
@@ -678,22 +680,22 @@ object FingerTree {
       def takeWhile1( pred: V => Boolean, init: V )( implicit m: Measure[ A, V ]) : (MaybeDigit[ V, A ], A) = {
          val va1  = m( a1 )
          val v1   = m |+| (init, va1)
-         if( pred( v1 )) {                      // (), a1
-            (Zero[ V ](), a1)
-         } else {
+         if( pred( v1 )) {
             val va2 = m( a2 )
             val v12 = m |+| (v1, va2)
-            if( pred( v12 )) {                  // (a1), a2
-               (One( va1, a1 ), a2)
-            } else {
+            if( pred( v12 )) {
                val va3  = m( a3 )
                val va12 = m |+| (va1, va2)
-               if( pred( m |+| (v12, va3) )) {  // (a1, a2), a3
-                  (Two( va12, a1, a2 ), a3)
-               } else {                         // (a1, a2, a3), a4
-                  (Three( m |+| (va12, va3), a1, a2, a3 ), a4)
+               if( pred( m |+| (v12, va3) )) {
+                  (Three( m |+| (va12, va3), a1, a2, a3 ), a4) // (a1, a2, a3), a4
+               } else {
+                  (Two( va12, a1, a2 ), a3)                    // (a1, a2), a3
                }
+            } else {
+               (One( va1, a1 ), a2)                            // (a1), a2
             }
+         } else {
+            (Zero[ V ](), a1)                                  // (), a1
          }
       }
 
@@ -701,20 +703,20 @@ object FingerTree {
          val va1  = m( a1 )
          val va2  = m( a2 )
          val v1   = m |+| (init, va1)
-         if( pred( v1 )) {                      // a1, (a2, a3, a4)
-            (a1, Three( m |+| (va2, m( a3 ), m( a4 )), a2, a3, a4 ))
-         } else {
+         if( pred( v1 )) {
             val v12 = m |+| (v1, va2)
             val va3 = m( a3 )
-            if( pred( v12 )) {                  // a2, (a3, a4)
-               (a2, Two( m |+| (va3, m( a4 )), a3, a4 ))
-            } else {
-               if( pred( m |+| (v12, va3) )) {  // a3, (a4)
-                  (a3, One( m( a4 ), a4 ))
-               } else {                         // a4, ()
-                  (a4, Zero[ V ]())
+            if( pred( v12 )) {
+               if( pred( m |+| (v12, va3) )) {
+                  (a4, Zero[ V ]())                                  // a4, ()
+               } else {
+                  (a3, One( m( a4 ), a4 ))                           // a3, (a4)
                }
+            } else {
+               (a2, Two( m |+| (va3, m( a4 )), a3, a4 ))             // a2, (a3, a4)
             }
+         } else {
+            (a1, Three( m |+| (va2, m( a3 ), m( a4 )), a2, a3, a4 )) // a1, (a2, a3, a4)
          }
       }
 
