@@ -12,17 +12,17 @@ trait IndexedSeqLike[ V, A, Repr <: IndexedSeqLike[ V, A, Repr ]] extends Finger
 
    def size : Int
 
-   final def drop( n: Int ) : Repr = wrap( splitTreeAt( n )._2 )
-   final def dropRight( n: Int ) : Repr = wrap( splitTreeAt( size - n )._1 )
-   final def slice( from: Int, until: Int ) : Repr = dropRight( size - until ).drop( from ) // XXX most efficient?
+   final def drop(      n: Int ) : Repr = wrap( dropTree( n ))
+   final def dropRight( n: Int ) : Repr = wrap( takeTree( size - n ))
+   final def slice( from: Int, until: Int ) : Repr = take( until ).drop( from )
 
    final def splitAt( i: Int ) : (Repr, Repr) = {
-      val (l, r) = splitTreeAt( i )
+      val (l, r) = tree.split( indexPred( i ))
       (wrap( l ), wrap( r ))
    }
 
-   final def take( n: Int ) : Repr = wrap( splitTreeAt( n )._1 )
-   final def takeRight( n: Int ) : Repr = wrap( splitTreeAt( size - n )._2 )
+   final def take(      n: Int ) : Repr = wrap( takeTree( n ))
+   final def takeRight( n: Int ) : Repr = wrap( dropTree( size - n ))
 
 //   final def updated( index: Int, elem: A ) : Repr = {
 //      if( index < 0 || index >= size ) throw new IndexOutOfBoundsException( index.toString )
@@ -32,6 +32,7 @@ trait IndexedSeqLike[ V, A, Repr <: IndexedSeqLike[ V, A, Repr ]] extends Finger
 
    protected def indexPred( i: Int ) : V => Boolean
 
-   private def splitTreeAt( i: Int ) = tree.split( indexPred( i ))
+   private def takeTree( i: Int ) = tree.takeWhile( indexPred( i ))
+   private def dropTree( i: Int ) = tree.dropWhile( indexPred( i ))
 //   private def splitTree1(  i: Int ) = tree.split1( indexPred( i ))
 }
