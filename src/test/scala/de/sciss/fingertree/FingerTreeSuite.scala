@@ -36,10 +36,12 @@ class FingerTreeSuite extends FeatureSpec with GivenWhenThen {
          val (finger, scala) = createStructures
 
          when( "the elements are compared" )
-         val iter = finger.iterator.zip( scala.iterator )
-         val diff = iter.find { case (a, b) => a != b }
+         val iter    = finger.iterator.zip( scala.iterator )
+         val diff    = iter.find { case (a, b) => a != b }
+         val diff2   = (0 until finger.size).exists( i => finger( i ) != scala( i ))
          then( "they should be all equal" )
          assert( diff.isEmpty, "Found different pair " + diff )
+         assert( !diff2, "Found differences using `apply`" )
 
          when( "the sizes are queried" )
          val szf = finger.size

@@ -37,7 +37,6 @@ object IndexedSeq {
 
       protected def isSizeGtPred(   i: Int ) = _  > i
       protected def isSizeLteqPred( i: Int ) = _ <= i
-//      protected def sizeMeasure( i: Int ) = i
 
       def size : Int = tree.measure
 
