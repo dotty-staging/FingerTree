@@ -12,7 +12,7 @@ The current implementation is a rewrite of previous versions. It tries to combin
 
 ### building
 
-This builds with Scala 2.9.2 and sbt 0.12. Standard targets are `compile`, `package`, `doc`, `console`, `test`, `publish-local`.
+This builds with Scala 2.10 (default) and 2.9.2 and sbt 0.12. Standard targets are `compile`, `package`, `doc`, `console`, `test`, `publish-local`.
 
 ## linking to FingerTree
 
