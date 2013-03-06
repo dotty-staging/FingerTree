@@ -35,25 +35,25 @@ class FingerTreeSuite extends FeatureSpec with GivenWhenThen {
       scenarioWithTime( "Build+Compare", "Comparing structure to plain brute-force Scala structure" ) {
          val (finger, scala) = createStructures
 
-         when( "the elements are compared" )
+         When( "the elements are compared" )
          val iter    = finger.iterator.zip( scala.iterator )
          val diff    = iter.find { case (a, b) => a != b }
          val diff2   = (0 until finger.size).exists( i => finger( i ) != scala( i ))
-         then( "they should be all equal" )
+         Then( "they should be all equal" )
          assert( diff.isEmpty, "Found different pair " + diff )
          assert( !diff2, "Found differences using `apply`" )
 
-         when( "the sizes are queried" )
+         When( "the sizes are queried" )
          val szf = finger.size
          val szs = scala.size
-         then( "they should be the same, and equal to the specification N" )
+         Then( "they should be the same, and equal to the specification N" )
          assert( szf == szs, "FingerTree had size " + szf + ", Scala Vector had size " + szs )
          assert( szf == N1, "Expected size was " + N1 + ", but actual size was " + szf )
 
-         when( "the sums are queried" )
+         When( "the sums are queried" )
          val sumf = finger.sum
          val sums = scala.map( _.toLong ).sum
-         then( "they should be the same" )
+         Then( "they should be the same" )
          assert( sumf == sums, "FingerTree says sum is " + sumf + ", but Scala Vector sum is " + sums )
       }
    }
@@ -61,8 +61,8 @@ class FingerTreeSuite extends FeatureSpec with GivenWhenThen {
    scenarioWithTime( "Slice", "Creating arbitrary slices of the tree" ) {
       val (finger, scala) = createStructures
 
-      when( "arbitrary slices are taken" )
-      then( "they should be the same to the Vector counterparts" )
+      When( "arbitrary slices are taken" )
+      Then( "they should be the same to the Vector counterparts" )
 
       for( i <- 0 until N2 ) {
          val n = rnd.nextInt( finger.size + 1 )

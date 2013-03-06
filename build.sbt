@@ -42,7 +42,7 @@ buildInfoPackage := "de.sciss.fingertree"
 publishMavenStyle := true
 
 publishTo <<= version { (v: String) =>
-  Some(if (v endsWith "-SNAPSHOT"))
+  Some(if (v endsWith "-SNAPSHOT")
     "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
   else
     "Sonatype Releases"  at "https://oss.sonatype.org/service/local/staging/deploy/maven2"
