@@ -34,6 +34,6 @@ Future versions will provide more ready-made structures, such as ordered sequenc
 
 ### todo
 
- - concatenation of trees
  - efficient bulk loading
- - ordered and ranged templates
+ - ordered templates
+ - equals/hashCode

@@ -57,10 +57,10 @@ object FingerTree {
   private def concat[V, A](left: FingerTree[V, A], mid: List[A], right: FingerTree[V, A])
                           (implicit m: Measure[A, V]): FingerTree[V, A] =
     (left, right) match {
-      case (Empty(_), _)      => mid.foldLeft(right)(_.+:(_))
-      case (_, Empty(_))      => mid.foldLeft(left )(_.:+(_))
-      case (Single(_, x), _)  => x +: mid.foldLeft(right)(_.+:(_))
-      case (_, Single(_, x))  => mid.foldLeft(left )(_.:+(_)) :+ x
+      case (Empty(_), _)      => mid.foldRight(right)((a, b) => a +: b)
+      case (_, Empty(_))      => mid.foldLeft (left )((b, a) => b :+ a)
+      case (Single(_, x), _)  => x +: mid.foldRight(right)((a, b) => a +: b)
+      case (_, Single(_, x))  => mid.foldLeft (left )((b, a) => b :+ a) :+ x
       case (ld @ Deep(_, _, _, _), rd @ Deep(_, _, _, _)) => deepConcat[V, A](ld, mid, rd)
     }
 
