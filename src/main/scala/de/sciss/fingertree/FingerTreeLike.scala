@@ -2,7 +2,7 @@
  * FingerTreeLike.scala
  * (FingerTree)
  *
- * Copyright (c) 2011-2012 Hanns Holger Rutz. All rights reserved.
+ * Copyright (c) 2011-2013 Hanns Holger Rutz. All rights reserved.
  *
  * This software is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -25,27 +25,30 @@
 
 package de.sciss.fingertree
 
-trait FingerTreeLike[ V, A, Repr <: FingerTreeLike[ V, A, Repr ]] {
-   protected implicit def m: Measure[ A, V ]
+trait FingerTreeLike[V, A, Repr <: FingerTreeLike[V, A, Repr]] {
+  protected implicit def m: Measure[A, V]
 
-   final def iterator: Iterator[ A ] = tree.iterator
-   final def isEmpty: Boolean = tree.isEmpty
-   final def nonEmpty: Boolean = !isEmpty
+  final def iterator: Iterator[A] = tree.iterator
 
-   final def head: A = tree.head
-   final def headOption: Option[ A ] = tree.headOption
+  final def isEmpty : Boolean = tree.isEmpty
+  final def nonEmpty: Boolean = !isEmpty
 
-   final def last: A = tree.last
-   final def lastOption: Option[ A ] = tree.lastOption
+  final def head: A               = tree.head
+  final def headOption: Option[A] = tree.headOption
 
-   final def init: Repr = wrap( tree.init )
-   final def tail: Repr = wrap( tree.tail )
+  final def last: A               = tree.last
+  final def lastOption: Option[A] = tree.lastOption
 
-//   final def foreach[ U ]( f: A => U ) { tree.foreach( f )}
+  final def init: Repr = wrap(tree.init)
+  final def tail: Repr = wrap(tree.tail)
 
-   final def toList : List[ A ] = tree.toList
-//   def toStream : Stream[ A ] = tree.toStream
+  // final def foreach[ U ]( f: A => U ) { tree.foreach( f )}
 
-   protected def tree: FingerTree[ V, A ]
-   protected def wrap( tree: FingerTree[ V, A ]) : Repr
+  final def toList: List[A] = tree.toList
+
+  // def toStream : Stream[ A ] = tree.toStream
+
+  protected def tree: FingerTree[V, A]
+
+  protected def wrap(tree: FingerTree[V, A]): Repr
 }
