@@ -26,7 +26,6 @@
 package de.sciss.fingertree
 
 object Measure {
-
   object Unit extends Measure[Any, Unit] {
     override def toString = "Unit"
 

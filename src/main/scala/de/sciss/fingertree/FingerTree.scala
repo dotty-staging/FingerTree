@@ -82,6 +82,8 @@ object FingerTree {
       Deep(m |+|(vPrefix, vSuffix), prefix, empty[V, Digit[V, A1]], suffix)
     }
 
+    def ++[A1 >: A](right: FingerTree[V, A1])(implicit m: Measure[A1, V]): FingerTree[V, A1] = ???
+
     def viewLeft (implicit m: Measure[A, V]): ViewLeft [V, A] = ViewLeftCons [V, A](a, empty[V, A])
     def viewRight(implicit m: Measure[A, V]): ViewRight[V, A] = ViewRightCons[V, A](empty[V, A], a)
 
@@ -169,6 +171,8 @@ object FingerTree {
           Deep(vNew, prefix, tree, partial :+ b)
       }
     }
+
+    def ++[A1 >: A](right: FingerTree[V, A1])(implicit m: Measure[A1, V]): FingerTree[V, A1] = ???
 
     def viewLeft(implicit m: Measure[A, V]): ViewLeft[V, A] =
       ViewLeftCons(prefix.head, deepLeft(prefix.tail, tree, suffix))
@@ -344,6 +348,8 @@ object FingerTree {
 
     def +:[A1](a1: A1)(implicit m: Measure[A1, V]): FingerTree[V, A1] = Single(m(a1), a1)
     def :+[A1](a1: A1)(implicit m: Measure[A1, V]): FingerTree[V, A1] = Single(m(a1), a1)
+
+    def ++[A1 >: Nothing](right: FingerTree[V, A1])(implicit m: Measure[A1, V]): FingerTree[V, A1] = right
 
     def viewLeft (implicit m: Measure[Nothing, V]): ViewLeft [V, Nothing] = ViewNil[V]()
     def viewRight(implicit m: Measure[Nothing, V]): ViewRight[V, Nothing] = ViewNil[V]()
@@ -829,6 +835,8 @@ sealed trait FingerTree[ V, +A ] {
    * @return  the new tree with the element appended
    */
   def :+[A1 >: A](b: A1)(implicit m: Measure[A1, V]): FingerTree[V, A1]
+
+  def ++[A1 >: A](right: FingerTree[V, A1])(implicit m: Measure[A1, V]): FingerTree[V, A1]
 
   def viewLeft (implicit m: Measure[A, V]): ViewLeft[V, A]
   def viewRight(implicit m: Measure[A, V]): ViewRight[V, A]
