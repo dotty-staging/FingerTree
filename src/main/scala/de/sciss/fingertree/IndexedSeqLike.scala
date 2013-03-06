@@ -26,10 +26,9 @@
 package de.sciss.fingertree
 
 trait IndexedSeqLike[V, A, Repr <: IndexedSeqLike[V, A, Repr]] extends FingerTreeLike[V, A, Repr] {
-  // final def ++( xs: Repr ): Repr = wrap( tree <++> xs.tree )
-
-  final def :+(x: A): Repr = wrap(tree :+ x)
-  final def +:(x: A): Repr = wrap(x +: tree)
+  final def :+(x: A): Repr      = wrap(tree :+ x)
+  final def +:(x: A): Repr      = wrap(x +: tree)
+  final def ++(xs: Repr): Repr  = wrap(tree ++ xs.tree)
 
   final def apply(idx: Int): A = {
     if (idx < 0 || idx >= size) throw new IndexOutOfBoundsException(idx.toString)

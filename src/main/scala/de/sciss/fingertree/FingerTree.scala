@@ -52,6 +52,61 @@ object FingerTree {
     def |+|(a: V, b: V, c: V): V = m |+|(a, b, c)
   }
 
+  // ---- functions ----
+
+  private def concat[V, A](left: FingerTree[V, A], mid: List[A], right: FingerTree[V, A])
+                          (implicit m: Measure[A, V]): FingerTree[V, A] =
+    (left, right) match {
+      case (Empty(_), _)      => mid.foldLeft(right)(_.+:(_))
+      case (_, Empty(_))      => mid.foldLeft(left )(_.:+(_))
+      case (Single(_, x), _)  => x +: mid.foldLeft(right)(_.+:(_))
+      case (_, Single(_, x))  => mid.foldLeft(left )(_.:+(_)) :+ x
+      case (ld @ Deep(_, _, _, _), rd @ Deep(_, _, _, _)) => deepConcat[V, A](ld, mid, rd)
+    }
+
+  private def deepConcat[V, A](left: Deep[V, A], mid: List[A], right: Deep[V, A])
+                              (implicit m: Measure[A, V]): FingerTree[V, A] = {
+
+    def nodes(xs: List[A]): List[Digit[V, A]] = xs match {
+      case a :: b :: Nil            => Two  (m |+|(m(a), m(b)      ), a, b   ) :: Nil
+      case a :: b :: c :: Nil       => Three(m |+|(m(a), m(b), m(c)), a, b, c) :: Nil
+      case a :: b :: c :: d :: Nil  => Two  (m |+|(m(a), m(b)      ), a, b   ) ::
+                                       Two  (m |+|(m(c), m(d)      ), c, d   ) :: Nil
+      case a :: b :: c :: tail      => Three(m |+|(m(a), m(b), m(c)), a, b, c) :: nodes(tail)
+    }
+
+    val prd = left.prefix
+    val tr  = concat(left.tree, nodes(left.suffix.toList ::: mid ::: right.prefix.toList), right.tree)
+    val sf  = right.suffix
+    Deep(m |+|(prd.measure, tr.measure, sf.measure), prd, tr, sf)
+  }
+
+  private def deepLeft[V, A](pr: MaybeDigit[V, A], tr: FingerTree[V, Digit[V, A]], sf: Digit[V, A])
+                      (implicit m: Measure[A, V]): FingerTree[V, A] = {
+    if (pr.isEmpty) {
+      tr.viewLeft match {
+        case ViewLeftCons(a, tr1) => Deep(m |+|(a.measure, tr1.measure, sf.measure), a, tr1, sf)
+        case _ => sf.toTree
+      }
+    } else {
+      val prd = pr.get
+      Deep(m |+|(prd.measure, tr.measure, sf.measure), prd, tr, sf)
+    }
+  }
+
+  private def deepRight[V, A](pr: Digit[V, A], tr: FingerTree[V, Digit[V, A]], sf: MaybeDigit[V, A])
+                       (implicit m: Measure[A, V]): FingerTree[V, A] = {
+    if (sf.isEmpty) {
+      tr.viewRight match {
+        case ViewRightCons(tr1, a) => Deep(m |+|(pr.measure, tr1.measure, a.measure), pr, tr1, a)
+        case _ => pr.toTree
+      }
+    } else {
+      val sfd = sf.get
+      Deep(m |+|(pr.measure, tr.measure, sfd.measure), pr, tr, sfd)
+    }
+  }
+
   // ---- Trees ----
 
   final private case class Single[V, A](measure: V, a: A) extends FingerTree[V, A] {
@@ -82,7 +137,7 @@ object FingerTree {
       Deep(m |+|(vPrefix, vSuffix), prefix, empty[V, Digit[V, A1]], suffix)
     }
 
-    def ++[A1 >: A](right: FingerTree[V, A1])(implicit m: Measure[A1, V]): FingerTree[V, A1] = ???
+    def ++[A1 >: A](right: FingerTree[V, A1])(implicit m: Measure[A1, V]): FingerTree[V, A1] = a +: right
 
     def viewLeft (implicit m: Measure[A, V]): ViewLeft [V, A] = ViewLeftCons [V, A](a, empty[V, A])
     def viewRight(implicit m: Measure[A, V]): ViewRight[V, A] = ViewRightCons[V, A](empty[V, A], a)
@@ -128,7 +183,9 @@ object FingerTree {
     override def toString = "(" + a + ")"
   }
 
-  final private case class Deep[V, A](measure: V, prefix: Digit[V, A], tree: FingerTree[V, Digit[V, A]],
+  final private case class Deep[V, +A](measure: V,
+                                      prefix: Digit[V, A],
+                                      tree:   FingerTree[V, Digit[V, A]],
                                       suffix: Digit[V, A])
     extends FingerTree[V, A] {
 
@@ -172,7 +229,13 @@ object FingerTree {
       }
     }
 
-    def ++[A1 >: A](right: FingerTree[V, A1])(implicit m: Measure[A1, V]): FingerTree[V, A1] = ???
+    // we could use app3 with an empty middle argument, as hinze/paterson suggest, but let's
+    // keep the simplified polymorphic ++ here for faster handling of empty and single cats.
+    def ++[A1 >: A](right: FingerTree[V, A1])(implicit m: Measure[A1, V]): FingerTree[V, A1] = right match {
+      case Empty(_)     => this
+      case Single(_, a) => this :+ a
+      case rd @ Deep(_, _, _, _) => deepConcat[V, A1](this, Nil, rd)
+    }
 
     def viewLeft(implicit m: Measure[A, V]): ViewLeft[V, A] =
       ViewLeftCons(prefix.head, deepLeft(prefix.tail, tree, suffix))
@@ -209,32 +272,6 @@ object FingerTree {
         val (elem, right) = dropWhile1(pred, m.zero)
         (elem +: right)
       }
-
-    private def deepLeft(pr: MaybeDigit[V, A], tr: FingerTree[V, Digit[V, A]], sf: Digit[V, A])
-                        (implicit m: Measure[A, V]): Tree = {
-      if (pr.isEmpty) {
-        tr.viewLeft match {
-          case ViewLeftCons(a, tr1) => Deep(m |+|(a.measure, tr1.measure, sf.measure), a, tr1, sf)
-          case _ => sf.toTree
-        }
-      } else {
-        val prd = pr.get
-        Deep(m |+|(prd.measure, tr.measure, sf.measure), prd, tr, sf)
-      }
-    }
-
-    private def deepRight(pr: Digit[V, A], tr: FingerTree[V, Digit[V, A]], sf: MaybeDigit[V, A])
-                         (implicit m: Measure[A, V]): Tree = {
-      if (sf.isEmpty) {
-        tr.viewRight match {
-          case ViewRightCons(tr1, a) => Deep(m |+|(pr.measure, tr1.measure, a.measure), pr, tr1, a)
-          case _ => pr.toTree
-        }
-      } else {
-        val sfd = sf.get
-        Deep(m |+|(pr.measure, tr.measure, sfd.measure), pr, tr, sfd)
-      }
-    }
 
     def span1(pred: V => Boolean)(implicit m: Measure[A, V]): (Tree, A, Tree) = span1(pred, m.zero)
 
