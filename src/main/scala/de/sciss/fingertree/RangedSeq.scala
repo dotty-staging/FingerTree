@@ -44,34 +44,32 @@ object RangedSeq {
     def findOverlap(interval: (P, P)): Option[Elem] = {
       tree.measure flatMap { case (_, tHi) =>
         val (iLo, iHi) = interval
-        // if the search interval's low bound is smaller or equal than the tree's total up bound...
-        if (ordering.lteq(iLo, tHi)) {
+        // if the search interval's low bound is smaller than the tree's total up bound...
+        if (ordering.lt(iLo, tHi)) {
           // "gives us the interval x with the smallest low endpoint
           //  whose high endpoint is at least the low endpoint of the query interval"
           //
           // Note: n <= MInfty is always false. Since MInfty is equivalent to None
           //   in our implementation, we can write _.map( ... ).getOrElse( false )
           //   for this test
-          val (_, x, _) = tree.span1(atleast(iLo) _, tree.measure)
-          // "It then remains to check that low x <= high i"
-          if (ordering.lteq(view(x)._1, iHi)) Some(x) else None
+//          val (_, x, _) = tree.span1(stopGt(iLo) _, tree.measure)
+          val x = tree.find1(stopGt(iLo) _)
+          // It then remains to check that low x <= high i
+          if (ordering.lt(view(x)._1, iHi)) Some(x) else None
         } else None
       }
     }
 
-//    def filterOverlap(interval: (P, P)): Iterator[Elem] = {
-//      val (iLo, iHi) = interval
-//
-////      def matches(xs: FT): Iterator[(A, A)] = {
-////        val v = xs.takeWhile(atleast(iLo) _).viewl
-////        v.fold(Stream.empty, (x, xs0) => Stream.cons(x, matches(xs0)))
-////      }
-////      matches(tree.takeUntil(greater(iHi) _))
-//      ???
-//    }
+    def filterOverlap(interval: (P, P)): RangedSeq[Elem, P] = {
+      val (iLo, iHi) = interval
 
-    @inline private def atleast(k: P)(v: Anno[P]) = v.map(tup => ordering.gt(k, tup._2)).getOrElse(false)
-//    @inline private def greater(k: P)(v: Anno[P]) = v.map(tup => ordering.gt(tup._1, k)).getOrElse(false)
+      val until = tree.takeWhile(startLt(iHi) _)  // keep only those elements whose start is < query_hi
+      val from  = until.dropWhile(stopGt(iLo) _)  //      only those          whose stop  is > query_lo
+      wrap(from)
+    }
+
+    @inline private def stopGt (k: P)(v: Anno[P]) = v.map(tup => ordering.gt(k, tup._2)).getOrElse(false)
+    @inline private def startLt(k: P)(v: Anno[P]) = v.map(tup => ordering.gt(tup._1, k)).getOrElse(false)
 
     // "We order the intervals by their low endpoints"
     private def splitTreeAt(interval: (P, P)) = {
@@ -83,15 +81,25 @@ object RangedSeq {
   }
 }
 trait RangedSeq[Elem, P] extends FingerTreeLike[Option[(P, P)], Elem, RangedSeq[Elem, P]] {
+  /** Adds a new element to the tree. */
   def +(elem: Elem): RangedSeq[Elem, P]
 
-  /* TODO:
-        this should be renamed to findTouching
-        and findOverlap should change the semantics
-        from lteq to lt!
-   */
+  /** Finds an element that overlaps a given interval.
+    * An overlap occurs if the intersection between query interval
+    * and found interval is non-empty. In other words, found_start < query_stop && found_stop > query_start.
+    * Of the candidates, returns the one with the lowest start point.
+    *
+    * @param interval the query interval
+    * @return         the element which overlaps the query interval, or `None` if there is none.
+    */
   def findOverlap(interval: (P, P)): Option[Elem]
 
-// XXX TODO:
-//  def filterOverlap(interval: (P, P)): Iterator[Elem]
+  /** Filters the tree to contain only those element that overlap a given interval.
+    * An overlap occurs if the intersection between query interval
+    * and found interval is non-empty. In other words, found_start < query_stop && found_stop > query_start.
+    *
+    * @param interval the query interval
+    * @return         the filtered tree whose overlaps the query interval
+    */
+  def filterOverlap(interval: (P, P)): RangedSeq[Elem, P]
 }
