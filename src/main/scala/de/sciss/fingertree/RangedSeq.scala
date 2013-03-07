@@ -16,6 +16,8 @@ object RangedSeq {
   private abstract class Impl[Elem, P](view: Elem => (P, P), ordering: Ordering[P])
     extends RangedSeq[Elem, P] with Measure[Elem, Anno[P]] {
 
+    protected val tree: FingerTree[Anno[P], Elem]   // making this a val helps in debugger
+
     // ---- measure ----
 
     protected implicit def m: Measure[Elem, Anno[P]] = this
@@ -23,8 +25,13 @@ object RangedSeq {
     def zero          : Anno[P] = None
     def apply(c: Elem): Anno[P] = Some(view(c))
 
-    def |+|(a: Anno[P], b: Anno[P]): Anno[P]              = b orElse a
-    def |+|(a: Anno[P], b: Anno[P], c: Anno[P]): Anno[P]  = c orElse b orElse a
+    def |+|(a: Anno[P], b: Anno[P]): Anno[P] = (a, b) match {
+      case (_, None) => a
+      case (None, _) => b
+      case (Some((alo, ahi)), Some((blo, bhi))) => Some((blo, ordering.max(ahi, bhi)))
+
+    }
+    def |+|(a: Anno[P], b: Anno[P], c: Anno[P]): Anno[P]  = |+|(|+|(a, b), c)
 
     // ---- fingertreelike ----
 
@@ -53,9 +60,11 @@ object RangedSeq {
           //   in our implementation, we can write _.map( ... ).getOrElse( false )
           //   for this test
 //          val (_, x, _) = tree.span1(stopGt(iLo) _, tree.measure)
-          val x = tree.find1(stopGt(iLo) _)
+          val x = tree.find1(isLtStop(iLo) _)
           // It then remains to check that low x <= high i
-          if (ordering.lt(view(x)._1, iHi)) Some(x) else None
+          val xLo = view(x)._1
+//println(s"FIND1 $x; has LO $xLo COMPARRE TO iHi $iHi")
+          if (ordering.lt(xLo, iHi)) Some(x) else None
         } else None
       }
     }
@@ -68,8 +77,9 @@ object RangedSeq {
       wrap(from)
     }
 
-    @inline private def stopGt (k: P)(v: Anno[P]) = v.map(tup => ordering.gt(k, tup._2)).getOrElse(false)
-    @inline private def startLt(k: P)(v: Anno[P]) = v.map(tup => ordering.gt(tup._1, k)).getOrElse(false)
+    @inline private def isLtStop(k: P)(v: Anno[P]) = v.map(tup => ordering.lt(k, tup._2)).getOrElse(false)
+    @inline private def stopGt  (k: P)(v: Anno[P]) = v.map(tup => ordering.gt(k, tup._2)).getOrElse(false)
+    @inline private def startLt (k: P)(v: Anno[P]) = v.map(tup => ordering.gt(tup._1, k)).getOrElse(false)
 
     // "We order the intervals by their low endpoints"
     private def splitTreeAt(interval: (P, P)) = {
