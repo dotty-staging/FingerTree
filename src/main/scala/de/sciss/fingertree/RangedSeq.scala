@@ -74,7 +74,7 @@ object RangedSeq {
       val (iLo, iHi) = interval
 
       val until = tree .takeWhile(isGtStart (iHi) _)  // keep only those elements whose start is < query_hi
-      val from  = until.dropWhile(isLteqStop(iLo) _)  //      only those          whose stop  is > query_lo
+      val from  = until.dropWhile(isGteqStop(iLo) _)  //      only those          whose stop  is > query_lo
       wrap(from)
     }
 
@@ -83,7 +83,7 @@ object RangedSeq {
     // is the argument greater than an element's start point?
     @inline private def isGtStart (k: P)(v: Anno[P]) = v.map(tup => ordering.gt  (k, tup._1)).getOrElse(false)
     // is the argument less than or equal to element's stop point?
-    @inline private def isLteqStop(k: P)(v: Anno[P]) = v.map(tup => ordering.lteq(k, tup._2)).getOrElse(false)
+    @inline private def isGteqStop(k: P)(v: Anno[P]) = v.map(tup => ordering.gteq(k, tup._2)).getOrElse(false)
 
     // "We order the intervals by their low endpoints"
     private def splitTreeAt(interval: (P, P)) = {

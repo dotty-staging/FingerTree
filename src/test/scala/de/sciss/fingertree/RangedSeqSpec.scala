@@ -50,17 +50,17 @@ class RangedSeqSpec extends FunSpec {
         (35,45)
       )
       assert(r1.filterOverlap(( 0, 10)).toList === Nil)
-//      assert(r1.filterOverlap((22, 30)).toList === Nil)
+      assert(r1.filterOverlap((22, 30)).toList === Nil)
       assert(r1.filterOverlap((45,100)).toList === Nil)
 
       val res1 = r1.filterOverlap(( 0, 12))
       assert(res1.toList === List((10,20), (11,19)))
-//      assert(r1.filterOverlap(( 0, 13)).toList === List((10,20), (11,19), (12,18)))
-//
-//      assert(r1.filterOverlap((12, 13)).toList === List((11,19), (12,18)))
-//      assert(r1.filterOverlap((10,36)).toList === r1.toList)
-//      assert(r1.filterOverlap((30,30)).toList === Nil)
-//      assert(r1.filterOverlap((30,45)).toList === List((30,40), (35,45)))
+      assert(r1.filterOverlap(( 0, 13)).toList === List((10,20), (11,19), (12,18)))
+
+      assert(r1.filterOverlap((12, 13)).toList === List((10,20), (11,19), (12,18)))
+      assert(r1.filterOverlap((10,36)).toList === r1.toList)
+      assert(r1.filterOverlap((30,30)).toList === Nil)
+      assert(r1.filterOverlap((30,45)).toList === List((30,40), (35,45)))
     }
   }
 }
