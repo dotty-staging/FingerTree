@@ -217,7 +217,7 @@ object FingerTree {
 
     def :+[A1 >: A](b: A1)(implicit m: Measure[A1, V]): FingerTree[V, A1] = {
       val vb = m(b)
-      val vNew = m |+|(vb, measure)
+      val vNew = m |+|(measure, vb)
       suffix match {
         case Four(_, g, f, e, d) =>
           val vTreeSuffix = m |+|(m(g), m(f), m(e))
