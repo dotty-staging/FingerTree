@@ -61,6 +61,14 @@ class RangedSeqSpec extends FunSpec {
       assert(r1.filterOverlap((10,36)).toList === r1.toList)
       assert(r1.filterOverlap((30,30)).toList === Nil)
       assert(r1.filterOverlap((30,45)).toList === List((30,40), (35,45)))
+
+    }
+
+    it("should report its total range") {
+      val rl  = r.toList
+      val min = rl.map(_._1).min
+      val max = rl.map(_._2).max
+      assert(r.interval === Some((min, max)))
     }
   }
 }

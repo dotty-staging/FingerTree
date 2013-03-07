@@ -78,6 +78,15 @@ object RangedSeq {
       wrap(from)
     }
 
+    def interval: Option[(P, P)] = {
+      (tree.headOption, tree.measure) match {
+        case (Some(headElem), Some((_, maxStop))) =>
+          val minStart = view(headElem)._1
+          Some((minStart, maxStop))
+        case _ => None
+      }
+    }
+
     // is the argument less than an element's stop point?
     @inline private def isLtStop  (k: P)(v: Anno[P]) = v.map(tup => ordering.lt  (k, tup._2)).getOrElse(false)
     // is the argument greater than an element's start point?
@@ -94,7 +103,7 @@ object RangedSeq {
     override def toString = tree.iterator.mkString("RangedSeq(", ", ", ")")
   }
 }
-trait RangedSeq[Elem, P] extends FingerTreeLike[Option[(P, P)], Elem, RangedSeq[Elem, P]] {
+sealed trait RangedSeq[Elem, P] extends FingerTreeLike[Option[(P, P)], Elem, RangedSeq[Elem, P]] {
   /** Adds a new element to the tree. */
   def +(elem: Elem): RangedSeq[Elem, P]
 
@@ -116,4 +125,7 @@ trait RangedSeq[Elem, P] extends FingerTreeLike[Option[(P, P)], Elem, RangedSeq[
     * @return         the filtered tree whose overlaps the query interval
     */
   def filterOverlap(interval: (P, P)): RangedSeq[Elem, P]
+
+  /** Returns the total interval covered by the sequence, or `None` if the range is empty */
+  def interval: Option[(P, P)]
 }

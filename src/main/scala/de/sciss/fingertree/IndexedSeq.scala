@@ -45,5 +45,4 @@ object IndexedSeq {
     override def toString = tree.iterator.mkString("Seq(", ", ", ")")
   }
 }
-
-trait IndexedSeq[A] extends IndexedSeqLike[Int, A, IndexedSeq[A]]
+sealed trait IndexedSeq[A] extends IndexedSeqLike[Int, A, IndexedSeq[A]]
