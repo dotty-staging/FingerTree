@@ -44,8 +44,9 @@ object RangedSeq {
     def +(elem: Elem): RangedSeq[Elem, P] = {
       // Should have Interval wrapper that does this check...
       // require( ord.lteq( i._1, i._2 ), "Upper interval bound cannot be less than lower bound : " + i )
-      val (l, r) = splitTreeAt(view(elem))
-      wrap(l ++ (elem +: r))
+      val (l, r)  = splitTreeAt(view(elem))
+      val res     = l ++ (elem +: r)
+      wrap(res)
     }
 
     def findOverlap(interval: (P, P)): Option[Elem] = {
@@ -72,14 +73,17 @@ object RangedSeq {
     def filterOverlap(interval: (P, P)): RangedSeq[Elem, P] = {
       val (iLo, iHi) = interval
 
-      val until = tree.takeWhile(startLt(iHi) _)  // keep only those elements whose start is < query_hi
-      val from  = until.dropWhile(stopGt(iLo) _)  //      only those          whose stop  is > query_lo
+      val until = tree .takeWhile(isGtStart (iHi) _)  // keep only those elements whose start is < query_hi
+      val from  = until.dropWhile(isLteqStop(iLo) _)  //      only those          whose stop  is > query_lo
       wrap(from)
     }
 
-    @inline private def isLtStop(k: P)(v: Anno[P]) = v.map(tup => ordering.lt(k, tup._2)).getOrElse(false)
-    @inline private def stopGt  (k: P)(v: Anno[P]) = v.map(tup => ordering.gt(k, tup._2)).getOrElse(false)
-    @inline private def startLt (k: P)(v: Anno[P]) = v.map(tup => ordering.gt(tup._1, k)).getOrElse(false)
+    // is the argument less than an element's stop point?
+    @inline private def isLtStop  (k: P)(v: Anno[P]) = v.map(tup => ordering.lt  (k, tup._2)).getOrElse(false)
+    // is the argument greater than an element's start point?
+    @inline private def isGtStart (k: P)(v: Anno[P]) = v.map(tup => ordering.gt  (k, tup._1)).getOrElse(false)
+    // is the argument less than or equal to element's stop point?
+    @inline private def isLteqStop(k: P)(v: Anno[P]) = v.map(tup => ordering.lteq(k, tup._2)).getOrElse(false)
 
     // "We order the intervals by their low endpoints"
     private def splitTreeAt(interval: (P, P)) = {
