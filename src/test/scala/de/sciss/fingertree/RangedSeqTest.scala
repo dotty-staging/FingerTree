@@ -11,6 +11,6 @@ object RangedSeqTest extends App {
   val r1  = r0 + Region("a", 10, 20)
   val r2  = r1 + Region("b", 2, 3)
 
-  val res = r2.findOverlap((0,3))
+  val res = r2.findOverlaps((0,3))
   println(res)
 }

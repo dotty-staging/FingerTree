@@ -25,6 +25,10 @@
 
 package de.sciss.fingertree
 
+import collection.generic.CanBuildFrom
+import annotation.unchecked.{uncheckedVariance => uV}
+import language.higherKinds
+
 /**
  * Variant of a finger tree which adds a measure.
  */
@@ -40,6 +44,15 @@ object FingerTree {
     var res = empty[V, A]
     elems.foreach(res :+= _)
     res
+  }
+
+  def one[V, A](a: A)(implicit m: Measure[A, V]): FingerTree[V, A] = Single(m(a), a)
+  def two[V, A](a: A, b: A)(implicit m: Measure[A, V]): FingerTree[V, A] = {
+    val vPrefix = m(a)
+    val prefix  = One(vPrefix, a)
+    val vSuffix = m(b)
+    val suffix  = One(vSuffix, b)
+    Deep(m |+|(vPrefix, vSuffix), prefix, empty[V, Digit[V, A]], suffix)
   }
 
   implicit private def digitMeasure[V, A](implicit m: Measure[A, V]): Measure[Digit[V, A], V] = new DigitMeasure(m)
@@ -124,17 +137,15 @@ object FingerTree {
     def +:[A1 >: A](b: A1)(implicit m: Measure[A1, V]): FingerTree[V, A1] = {
       val vPrefix = m(b)
       val prefix  = One(vPrefix, b)
-      val vSuffix = m(a)
-      val suffix  = One(vSuffix, a)
-      Deep(m |+|(vPrefix, vSuffix), prefix, empty[V, Digit[V, A1]], suffix)
+      val suffix  = One(measure, a)
+      Deep(m |+|(vPrefix, measure), prefix, empty[V, Digit[V, A1]], suffix)
     }
 
     def :+[A1 >: A](b: A1)(implicit m: Measure[A1, V]): FingerTree[V, A1] = {
-      val vPrefix = m(a)
-      val prefix  = One(vPrefix, a)
+      val prefix  = One(measure, a)
       val vSuffix = m(b)
       val suffix  = One(vSuffix, b)
-      Deep(m |+|(vPrefix, vSuffix), prefix, empty[V, Digit[V, A1]], suffix)
+      Deep(m |+|(measure, vSuffix), prefix, empty[V, Digit[V, A1]], suffix)
     }
 
     def ++[A1 >: A](right: FingerTree[V, A1])(implicit m: Measure[A1, V]): FingerTree[V, A1] = a +: right
@@ -164,21 +175,33 @@ object FingerTree {
       (e, a, e)
     }
 
-    private[fingertree] def span1(pred: V => Boolean, init: V)(implicit m: Measure[A, V]): (Tree, A, Tree) = {
+    def span1(pred: V => Boolean, init: V)(implicit m: Measure[A, V]): (Tree, A, Tree) = {
       val e = empty[V, A]
       (e, a, e)
     }
 
-    private[fingertree] def takeWhile1(pred: V => Boolean, init: V)(implicit m: Measure[A, V]): (Tree, A) = {
+    def takeWhile1(pred: V => Boolean, init: V)(implicit m: Measure[A, V]): (Tree, A) = {
       (empty[V, A], a) // correct???
     }
 
-    def find1(pred: V => Boolean)(implicit m: Measure[A, V]): A = a
+    def dropWhile1(pred: V => Boolean, init: V)(implicit m: Measure[A, V]): (A, Tree) = {
+      (a, empty[V, A]) // correct???
+    }
 
-    private[fingertree] def find1(pred: V => Boolean, init: V)(implicit m: Measure[A, V]): (V, A) = (init, a)
+    def find1(pred: V => Boolean)(implicit m: Measure[A, V]): (V, A) = find1(pred, m.zero)
+
+    private[fingertree] def find1(pred: V => Boolean, init: V)(implicit m: Measure[A, V]): (V, A) = {
+      val v1 = m |+|(init, measure)
+      (if (pred(v1)) init else v1, a)
+    }
 
     def toList: List[A] = a :: Nil
     def iterator: Iterator[A] = Iterator.single(a)
+    def to[Col[_]](implicit cbf: CanBuildFrom[Nothing, A, Col[A @uV]]): Col[A @uV] = {
+      val b = cbf.apply()
+      b += a
+      b.result()
+    }
 
     override def toString = "(" + a + ")"
   }
@@ -296,7 +319,7 @@ object FingerTree {
       }
     }
 
-    private[fingertree] def takeWhile1(pred: V => Boolean, init: V)(implicit m: Measure[A, V]): (Tree, A) = {
+    def takeWhile1(pred: V => Boolean, init: V)(implicit m: Measure[A, V]): (Tree, A) = {
       val vPrefix = m |+|(init, prefix.measure)
       if (pred(vPrefix)) {
         val vTree = m |+|(vPrefix, tree.measure)
@@ -317,7 +340,7 @@ object FingerTree {
       }
     }
 
-    private[fingertree] def dropWhile1(pred: V => Boolean, init: V)(implicit m: Measure[A, V]): (A, Tree) = {
+    def dropWhile1(pred: V => Boolean, init: V)(implicit m: Measure[A, V]): (A, Tree) = {
       val vPrefix = m |+|(init, prefix.measure)
       if (pred(vPrefix)) {
         val vTree = m |+|(vPrefix, tree.measure)
@@ -338,7 +361,7 @@ object FingerTree {
       }
     }
 
-    def find1(pred: V => Boolean)(implicit m: Measure[A, V]): A = find1(pred, m.zero)._2
+    def find1(pred: V => Boolean)(implicit m: Measure[A, V]): (V, A) = find1(pred, m.zero)
 
     private[fingertree] def find1(pred: V => Boolean, init: V)(implicit m: Measure[A, V]): (V, A) = {
       val vPrefix = m |+|(init, prefix.measure)
@@ -359,6 +382,7 @@ object FingerTree {
     }
 
     def toList: List[A] = iterator.toList
+    def to[Col[_]](implicit cbf: CanBuildFrom[Nothing, A, Col[A @uV]]): Col[A @uV] = iterator.to[Col]
 
     def iterator: Iterator[A] = {
       // Iterators compose nicely, ++ and flatMap are still lazy
@@ -402,8 +426,11 @@ object FingerTree {
     private[fingertree] def span1(pred: V => Boolean, init: V)(implicit m: Measure[Nothing, V]): (Tree, Nothing, Tree) =
       throw new UnsupportedOperationException("span1 on empty finger tree")
 
-    private[fingertree] def takeWhile1(pred: V => Boolean, init: V)(implicit m: Measure[Nothing, V]): (Tree, Nothing) =
+    def takeWhile1(pred: V => Boolean, init: V)(implicit m: Measure[Nothing, V]): (Tree, Nothing) =
       throw new UnsupportedOperationException("takeWhile1 on empty finger tree")
+
+    def dropWhile1(pred: V => Boolean, init: V)(implicit m: Measure[Nothing, V]): (Nothing, Tree) =
+      throw new UnsupportedOperationException("dropWhile1 on empty finger tree")
 
     def find1(pred: V => Boolean)(implicit m: Measure[Nothing, V]): Nothing =
       throw new UnsupportedOperationException("find1 on empty finger tree")
@@ -414,27 +441,38 @@ object FingerTree {
     def toList: List[Nothing] = Nil
 
     def iterator: Iterator[Nothing] = Iterator.empty
+    def to[Col[_]](implicit cbf: CanBuildFrom[Nothing, Nothing, Col[Nothing]]): Col[Nothing] = cbf().result()
 
     override def toString = "()"
   }
 
   // ---- Views ----
 
-  sealed trait ViewLeft[V, +A] {
+  sealed trait ViewLike {
+    def isEmpty: Boolean
+  }
+
+  sealed trait ViewLeft[V, +A] extends ViewLike {
     def head: A
     def tail: FingerTree[V, A]
   }
 
-  sealed trait ViewRight[V, +A] {
+  sealed trait ViewRight[V, +A] extends ViewLike {
     def init: FingerTree[V, A]
     def last: A
   }
 
-  final case class ViewLeftCons [V, A](head: A, tail: FingerTree[V, A]) extends ViewLeft[V, A]
-  final case class ViewRightCons[V, A](init: FingerTree[V, A], last: A) extends ViewRight[V, A]
+  final case class ViewLeftCons [V, A](head: A, tail: FingerTree[V, A]) extends ViewLeft[V, A] {
+    def isEmpty = false
+  }
+  final case class ViewRightCons[V, A](init: FingerTree[V, A], last: A) extends ViewRight[V, A] {
+    def isEmpty = false
+  }
 
   final case class ViewNil[V]() extends ViewLeft[V, Nothing] with ViewRight[V, Nothing] {
     private def notSupported(what: String) = throw new NoSuchElementException(what + " of empty view")
+
+    def isEmpty = true
 
     def head: Nothing = notSupported("head")
     def last: Nothing = notSupported("last")
@@ -508,7 +546,10 @@ object FingerTree {
     def +:[A1 >: A](b: A1)(implicit m: Measure[A1, V]): Digit[V, A1] = Two(m |+|(m(b), measure), b, a1)
     def :+[A1 >: A](b: A1)(implicit m: Measure[A1, V]): Digit[V, A1] = Two(m |+|(measure, m(b)), a1, b)
 
-    def find1(pred: V => Boolean, init: V)(implicit m: Measure[A, V]): (V, A) = (init, a1)
+    def find1(pred: V => Boolean, init: V)(implicit m: Measure[A, V]): (V, A) = {
+      val v1 = m |+|(init, measure)
+      (if (pred(v1)) init else v1, a1)
+    }
     def span1(pred: V => Boolean, init: V)(implicit m: Measure[A, V]): (MaybeDigit[V, A], A, MaybeDigit[V, A]) = {
       val e = Zero[V]()
       (e, a1, e)
@@ -546,7 +587,10 @@ object FingerTree {
 
     def find1(pred: V => Boolean, init: V)(implicit m: Measure[A, V]): (V, A) = {
       val v1 = m |+|(init, m(a1))
-      if (pred(v1)) (init, a1) else (v1, a2)
+      if (pred(v1)) (init, a1) else {
+        val v12 = m |+|(init, measure)
+        (if (pred(v12)) v1 else v12, a2)
+      }
     }
 
     def span1(pred: V => Boolean, init: V)(implicit m: Measure[A, V]): (MaybeDigit[V, A], A, MaybeDigit[V, A]) = {
@@ -614,7 +658,10 @@ object FingerTree {
       if (pred(v1)) (init, a1)
       else {
         val v12 = m |+|(v1, m(a2))
-        if (pred(v12)) (v1, a2) else (v12, a3)
+        if (pred(v12)) (v1, a2) else {
+          val v123 = m |+|(init, measure)
+          (if (pred(v123)) v12 else v123, a3)
+        }
       }
     }
 
@@ -702,7 +749,10 @@ object FingerTree {
         if (pred(v12)) (v1, a2)
         else {
           val v123 = m |+|(v12, m(a3))
-          if (pred(v123)) (v12, a3) else (v123, a4)
+          if (pred(v123)) (v12, a3) else {
+            val v1234 = m |+|(init, measure)
+           (if (pred(v1234)) v123 else v1234, a4)
+          }
         }
       }
     }
@@ -892,6 +942,8 @@ sealed trait FingerTree[ V, +A ] {
    */
   def toList: List[A]
 
+  def to[Col[_]](implicit cbf: CanBuildFrom[Nothing, A, Col[A @uV]]): Col[A @uV]
+
   /**
    * Same as `span1`, but drops the discerning element, instead only returning the left and right tree.
    * Unlike `span1`, this is an allowed operation on an empty tree.
@@ -934,7 +986,7 @@ sealed trait FingerTree[ V, +A ] {
    *             the test returns `true`.
    * @return  the discerning element
    */
-  def find1(pred: V => Boolean)(implicit m: Measure[A, V]): A
+  def find1(pred: V => Boolean)(implicit m: Measure[A, V]): (V, A)
 
   private[fingertree] def find1(pred: V => Boolean, init: V)(implicit m: Measure[A, V]): (V, A)
 
@@ -951,5 +1003,6 @@ sealed trait FingerTree[ V, +A ] {
   def takeWhile(pred: V => Boolean)(implicit m: Measure[A, V]): Tree
   def dropWhile(pred: V => Boolean)(implicit m: Measure[A, V]): Tree
 
-  private[fingertree] def takeWhile1(pred: V => Boolean, init: V)(implicit m: Measure[A, V]): (Tree, A)
+  def takeWhile1(pred: V => Boolean, init: V)(implicit m: Measure[A, V]): (Tree, A)
+  def dropWhile1(pred: V => Boolean, init: V)(implicit m: Measure[A, V]): (A, Tree)
 }

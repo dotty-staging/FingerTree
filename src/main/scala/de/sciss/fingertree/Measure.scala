@@ -46,6 +46,16 @@ object Measure {
     def |+|(a: Int, b: Int, c: Int) = a + b + c
   }
 
+  object SummedIntInt extends Measure[Int, Int] {
+    override def toString = "SummedIntLong"
+
+    val zero = 0
+    def apply(c: Int) = c
+
+    def |+|(a: Int, b: Int) = a + b
+    def |+|(a: Int, b: Int, c: Int) = a + b + c
+  }
+
   object SummedIntLong extends Measure[Int, Long] {
     override def toString = "SummedIntLong"
 

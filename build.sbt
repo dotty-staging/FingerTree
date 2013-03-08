@@ -1,6 +1,6 @@
 name := "FingerTree"
 
-version := "1.3.0-SNAPSHOT"
+version := "1.3.0"
 
 organization := "de.sciss"
 
@@ -12,7 +12,7 @@ licenses := Seq("GPL v2+" -> url("http://www.gnu.org/licenses/gpl-2.0.txt"))
 
 scalaVersion := "2.10.0"
 
-// crossScalaVersions := Seq( "2.10.0", "2.9.2" )
+// crossScalaVersions := Seq("2.10.0", "2.9.2")
 
 scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature")
 

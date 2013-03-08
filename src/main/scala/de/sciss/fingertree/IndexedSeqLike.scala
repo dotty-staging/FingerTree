@@ -32,7 +32,7 @@ trait IndexedSeqLike[V, A, Repr <: IndexedSeqLike[V, A, Repr]] extends FingerTre
 
   final def apply(idx: Int): A = {
     if (idx < 0 || idx >= size) throw new IndexOutOfBoundsException(idx.toString)
-    tree.find1(isSizeGtPred(idx))
+    tree.find1(isSizeGtPred(idx))._2
   }
 
   // final def size : Int = sizeMeasure( tree.measure )
@@ -43,8 +43,8 @@ trait IndexedSeqLike[V, A, Repr <: IndexedSeqLike[V, A, Repr]] extends FingerTre
 
   final def slice(from: Int, until: Int): Repr = take(until).drop(from)
 
-  final def splitAt(i: Int): (Repr, Repr) = {
-    val (l, r) = tree.span(isSizeLteqPred(i))
+  final def splitAt(idx: Int): (Repr, Repr) = {
+    val (l, r) = tree.span(isSizeLteqPred(idx))
     (wrap(l), wrap(r))
   }
 
@@ -61,16 +61,16 @@ trait IndexedSeqLike[V, A, Repr <: IndexedSeqLike[V, A, Repr]] extends FingerTre
    * For a given value `i`, returns a test function that when passed a measure,
    * compare's the measure's size component against `i` using `f(m) <= i`
    */
-  protected def isSizeLteqPred(i: Int): V => Boolean
+  protected def isSizeLteqPred(idx: Int): V => Boolean
 
   /**
    * For a given value `i`, returns a test function that when passed a measure,
    * compare's the measure's size component against `i` using `f(m) > i`
    */
-  protected def isSizeGtPred(i: Int): V => Boolean
+  protected def isSizeGtPred(idx: Int): V => Boolean
 
-  private def takeTree(i: Int) = tree.takeWhile(isSizeLteqPred(i))
-  private def dropTree(i: Int) = tree.dropWhile(isSizeLteqPred(i))
+  private def takeTree(idx: Int) = tree.takeWhile(isSizeLteqPred(idx))
+  private def dropTree(idx: Int) = tree.dropWhile(isSizeLteqPred(idx))
 
   // private def splitTree1(  i: Int ) = tree.split1( indexPred( i ))
 }

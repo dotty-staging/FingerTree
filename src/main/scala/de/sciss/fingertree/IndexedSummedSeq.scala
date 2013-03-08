@@ -57,10 +57,12 @@ object IndexedSummedSeq {
 
     def size: Int = tree.measure._1
     def sum: Sum  = tree.measure._2
+    def sumUntil(idx: Int) = tree.find1(isSizeGtPred(idx))._1._2
 
     override def toString = tree.iterator.mkString("Seq<sum=" + sum + ">(", ", ", ")")
   }
 }
 sealed trait IndexedSummedSeq[Elem, Sum] extends IndexedSeqLike[(Int, Sum), Elem, IndexedSummedSeq[Elem, Sum]] {
   def sum: Sum
+  def sumUntil(idx: Int): Sum
 }

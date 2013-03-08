@@ -25,6 +25,9 @@
 
 package de.sciss.fingertree
 
+import collection.generic.CanBuildFrom
+import language.higherKinds
+
 trait FingerTreeLike[V, A, Repr <: FingerTreeLike[V, A, Repr]] {
   protected implicit def m: Measure[A, V]
 
@@ -45,6 +48,7 @@ trait FingerTreeLike[V, A, Repr <: FingerTreeLike[V, A, Repr]] {
   // final def foreach[ U ]( f: A => U ) { tree.foreach( f )}
 
   final def toList: List[A] = tree.toList
+  final def to[Col[_]](implicit cbf: CanBuildFrom[Nothing, A, Col[A]]): Col[A] = tree.to[Col]
 
   // def toStream : Stream[ A ] = tree.toStream
 

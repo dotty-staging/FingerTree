@@ -7,74 +7,88 @@ import org.scalatest.FunSpec
  */
 class RangedSeqSpec extends FunSpec {
   describe("A RangedSeq") {
-    val r = RangedSeq((9,10), (59,61), (10,20), /* (31,39), */ (30,40), /* (50,60), */ (70,80))
+    val r1 = RangedSeq(
+      (9,10),
+      (59,61),
+      (10,20),
+      (30,40),
+      (70,80)
+    )
+    val r2 = RangedSeq(
+      (10,20),
+      (11,19),
+      (12,18),
+      (17,21),
+      (30,40),
+      (35,45)
+    )
 
     it("should be correctly sorted") {
-      val li = r.toList
+      val li = r1.toList
       assert(li === List((9,10), (10,20), (30,40), /* (31,39), */ /* (50,60), */ (59,61), (70,80)))
     }
 
     it("should find its own elements") {
-      r.toList.foreach { ival =>
-        val found = r.findOverlap(ival)
+      r1.toList.foreach { ival =>
+        val found = r1.findOverlaps(ival)
         assert(found === Some(ival))
       }
     }
 
     it("should not find overlaps which are gaps in the data set") {
-      val rl    = (-1, 0) :: r.toList ::: List((100, 101))
+      val rl    = (-1, 0) :: r1.toList ::: List((100, 101))
       val gaps  = rl.sliding(2,1).map {
         case (_, stop) :: (start, _) :: Nil => (stop, start)
         case _ => sys.error("Unexpected match")
       }
       gaps.foreach { ival =>
-        val found = r.findOverlap(ival)
+        val found = r1.findOverlaps(ival)
         assert(found.isEmpty, s"found = $found for gap $ival")
       }
     }
 
     it("should find overlaps with empty ranges") {
-      val r1 = RangedSeq((8,8))
-      assert(r1.findOverlap((7,8)) === None)
-      assert(r1.findOverlap((8,9)) === None)
-      assert(r1.findOverlap((7,9)) === Some((8,8)))
+      val r3 = RangedSeq((8,8))
+      assert(r3.findOverlaps((7,8)) === None)
+      assert(r3.findOverlaps((8,9)) === None)
+      assert(r3.findOverlaps((7,9)) === Some((8,8)))
     }
 
     it("should find multiple overlaps") {
-      val r1 = RangedSeq(
-        (10,20),
-        (11,19),
-        (12,18),
-        (17,21),
-        (30,40),
-        (35,45)
-      )
-      assert(r1.filterOverlap(( 0, 10)).toList === Nil)
-      assert(r1.filterOverlap((22, 30)).toList === Nil)
-      assert(r1.filterOverlap((45,100)).toList === Nil)
+      assert(r2.filterOverlaps(( 0, 10)).toList === Nil)
+      assert(r2.filterOverlaps((22, 30)).toList === Nil)
+      assert(r2.filterOverlaps((45,100)).toList === Nil)
 
-      val res1 = r1.filterOverlap(( 0, 12))
+      val res1 = r2.filterOverlaps(( 0, 12))
       assert(res1.toList === List((10,20), (11,19)))
-      assert(r1.filterOverlap(( 0, 13)).toList === List((10,20), (11,19), (12,18)))
+      assert(r2.filterOverlaps(( 0, 13)).toList === List((10,20), (11,19), (12,18)))
 
-      assert(r1.filterOverlap((12, 13)).toList === List((10,20), (11,19), (12,18)))
-      assert(r1.filterOverlap((10,36)).toList === r1.toList)
-      assert(r1.filterOverlap((30,30)).toList === Nil)
-      assert(r1.filterOverlap((30,45)).toList === List((30,40), (35,45)))
+      assert(r2.filterOverlaps((12, 13)).toList === List((10,20), (11,19), (12,18)))
+      assert(r2.filterOverlaps((10,36)).toList === r2.toList)
+      assert(r2.filterOverlaps((30,30)).toList === Nil)
+      assert(r2.filterOverlaps((30,45)).toList === List((30,40), (35,45)))
 
     }
 
     it("should report its total range") {
-      val rl  = r.toList
+      val rl  = r1.toList
       val min = rl.map(_._1).min
       val max = rl.map(_._2).max
-      assert(r.interval === Some((min, max)))
+      assert(r1.interval === Some((min, max)))
     }
 
     it("should return correct answers to some corner cases") {
-      val r1 = RangedSeq((0,3),(1,2))
-      val r2 = r1.filterOverlap((2,3))
-      assert(r2.toList === List((0,3)))
+      val r2 = RangedSeq((0,3),(1,2))
+      val r3 = r2.filterOverlaps((2,3))
+      assert(r3.toList === List((0,3)))
+    }
+
+    it("should answer inclusion queries") {
+      assert(r1.toList.forall { ival => r1.filterIncludes(ival).nonEmpty })
+      assert(r1.toList.forall { case (lo, hi) => r1.filterIncludes((lo + 1, hi)).nonEmpty })
+      assert(r1.toList.forall { case (lo, hi) => r1.filterIncludes((lo, hi - 1)).nonEmpty })
+      assert(r1.toList.forall { case (lo, hi) => r1.filterIncludes((lo - 1, hi)).isEmpty })
+      assert(r1.toList.forall { case (lo, hi) => r1.filterIncludes((lo, hi + 1)).isEmpty })
     }
   }
 }
