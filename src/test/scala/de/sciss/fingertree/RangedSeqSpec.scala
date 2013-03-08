@@ -70,5 +70,11 @@ class RangedSeqSpec extends FunSpec {
       val max = rl.map(_._2).max
       assert(r.interval === Some((min, max)))
     }
+
+    it("should return correct answers to some corner cases") {
+      val r1 = RangedSeq((0,3),(1,2))
+      val r2 = r1.filterOverlap((2,3))
+      assert(r2.toList === List((0,3)))
+    }
   }
 }
