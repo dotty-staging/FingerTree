@@ -80,19 +80,31 @@ object RangedSeq {
         case _ => None
       }
 
-    def filterOverlap(interval: (P, P)): RangedSeq[Elem, P] = {
+    def filterOverlap(interval: (P, P)): List[Elem] = {
       val (iLo, iHi) = interval
 
       val until = tree .takeWhile(isGtStart (iHi) _)  // keep only those elements whose start is < query_hi
-      val from  = until.dropWhile(isGteqStop(iLo) _)  //      only those          whose stop  is > query_lo
-      wrap(from)
+      // then we need to keep only those whose stop is > query_lo.
+      // the following is only the first step!
+      val from  = until.dropWhile(isGteqStop(iLo) _)
+
+      def matches(xs: FingerTree[Anno[P], Elem]): List[Elem] = {
+        val atLeast = xs.dropWhile(isGteqStop(iLo) _)
+        atLeast.viewLeft match {
+          case FingerTree.ViewNil() => Nil
+          case FingerTree.ViewLeftCons(head, tail) => head :: matches(tail)
+        }
+      }
+
+      val res = matches(from)
+      res // wrap(res)
     }
 
-    def intersect(point: P): RangedSeq[Elem, P] = {
-      val until = tree .takeWhile(isGteqStart(point) _) // keep only those elements whose start is < query_hi
-      val from  = until.dropWhile(isGteqStop (point) _) //      only those          whose stop  is > query_lo
-      wrap(from)
-    }
+//    def intersect(point: P): RangedSeq[Elem, P] = {
+//      val until = tree .takeWhile(isGteqStart(point) _) // keep only those elements whose start is < query_hi
+//      val from  = until.dropWhile(isGteqStop (point) _) //      only those          whose stop  is > query_lo
+//      wrap(from)
+//    }
 
     def interval: Option[(P, P)] = {
       (tree.headOption, tree.measure) match {
@@ -151,16 +163,16 @@ sealed trait RangedSeq[Elem, P] extends FingerTreeLike[Option[(P, P)], Elem, Ran
     * @param interval the query interval
     * @return         the filtered tree whose overlaps the query interval
     */
-  def filterOverlap(interval: (P, P)): RangedSeq[Elem, P]
+  def filterOverlap(interval: (P, P)): List[Elem] // RangedSeq[Elem, P]
 
-  /** Filters the tree to contain only those elements that contain a given point.
-    * An element contains the point if its interval start is less than or equal to that point
-    * and its interval stop is greater than that point.
-    *
-    * @param point  the intersection point
-    * @return       the filtered tree having only elements which contain the point
-    */
-  def intersect(point: P): RangedSeq[Elem, P]
+//  /** Filters the tree to contain only those elements that contain a given point.
+//    * An element contains the point if its interval start is less than or equal to that point
+//    * and its interval stop is greater than that point.
+//    *
+//    * @param point  the intersection point
+//    * @return       the filtered tree having only elements which contain the point
+//    */
+//  def intersect(point: P): RangedSeq[Elem, P]
 
   /** Returns the total interval covered by the sequence, or `None` if the range is empty */
   def interval: Option[(P, P)]
