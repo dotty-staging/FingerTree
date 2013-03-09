@@ -62,7 +62,7 @@ object FingerTree {
     def apply(n: Digit[V, A]): V = n.measure
 
     def |+|(a: V, b: V): V = m |+|(a, b)
-    def |+|(a: V, b: V, c: V): V = m |+|(a, b, c)
+    override def |+|(a: V, b: V, c: V): V = m |+|(a, b, c)
   }
 
   // ---- functions ----
@@ -207,9 +207,9 @@ object FingerTree {
   }
 
   final private case class Deep[V, +A](measure: V,
-                                      prefix: Digit[V, A],
-                                      tree:   FingerTree[V, Digit[V, A]],
-                                      suffix: Digit[V, A])
+                                       prefix: Digit[V, A],
+                                       tree:   FingerTree[V, Digit[V, A]],
+                                       suffix: Digit[V, A])
     extends FingerTree[V, A] {
 
     def isEmpty = false
