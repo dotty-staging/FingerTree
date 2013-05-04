@@ -1,6 +1,7 @@
 package de.sciss.fingertree
 
 import org.scalatest.FunSpec
+import scala.annotation.tailrec
 
 /**
  * test-only de.sciss.fingertree.RangedSeqSpec
@@ -89,6 +90,35 @@ class RangedSeqSpec extends FunSpec {
       assert(r1.toList.forall { case (lo, hi) => r1.filterIncludes((lo, hi - 1)).nonEmpty })
       assert(r1.toList.forall { case (lo, hi) => r1.filterIncludes((lo - 1, hi)).isEmpty })
       assert(r1.toList.forall { case (lo, hi) => r1.filterIncludes((lo, hi + 1)).isEmpty })
+    }
+
+    it("should support deletion") {
+      type Elem = (Char, Int, Int)
+      implicit val view = (tup: Elem) => (tup._2, tup._3)
+      val elems = List(
+        ('a', 10, 20),
+        ('b', 10, 20),
+        ('c', 10, 21),
+        ('d', 11, 20),
+        ('d', 10, 20),
+        ('e', 22, 30)
+      )
+      val r3 = RangedSeq[Elem, Int](elems: _*)
+      // remove single elements
+      elems.foreach { e =>
+        assert((r3 - e).to[Set] === elems.filterNot(_ == e).toSet)
+      }
+      // remove elements successively
+      @tailrec def loop(list: List[Elem], tree: RangedSeq[Elem, Int]) {
+        list match {
+          case head :: tail =>
+            val treeRem = tree - head
+            assert(treeRem.to[Set] === tail.toSet)
+            loop(tail, treeRem)
+          case _ =>
+        }
+      }
+      loop(elems, r3)
     }
   }
 }

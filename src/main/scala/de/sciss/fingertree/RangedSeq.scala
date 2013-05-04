@@ -25,6 +25,8 @@
 
 package de.sciss.fingertree
 
+import scala.annotation.tailrec
+
 object RangedSeq {
   def empty[Elem, P](implicit view: Elem => (P, P), ordering: Ordering[P]): RangedSeq[Elem, P] =
     new Impl(view, ordering) {
@@ -75,6 +77,27 @@ object RangedSeq {
       wrap(res)
     }
 
+    def -(elem: Elem): RangedSeq[Elem, P] = {
+      val v       = view(elem)
+      val elemLo  = v._1
+      val (l, r)  = splitTreeAt(v)
+
+      @tailrec def loop(left: FT[Elem, P], right: FT[Elem, P]): RangedSeq[Elem, P] =
+        right.viewLeft match {
+          case FingerTree.ViewLeftCons(head, tail) =>
+            if (head == elem) {
+              wrap(left ++ tail)
+            } else if (ordering.gt(view(head)._1, elemLo)) {
+              seq // not found
+            } else {
+              loop(left :+ head, tail)
+            }
+          case _ => seq // not found
+        }
+
+      loop(l, r)
+    }
+
     def findOverlaps(interval: (P, P)): Option[Elem] = {
       val (iLo, iHi) = interval
       tree.measure match {
@@ -99,7 +122,7 @@ object RangedSeq {
     def find(point: P): Option[Elem] =
       tree.measure match {
         case Some((_, tHi)) if (ordering.lt(point, tHi)) =>
-          val x = tree.find1(isLtStop(point) _)._2
+          val x   = tree.find1(isLtStop(point) _)._2
           val xLo = view(x)._1
           if (ordering.lteq(xLo, point)) Some(x) else None
 
@@ -108,7 +131,7 @@ object RangedSeq {
 
     def filterIncludes(interval: (P, P)): Iterator[Elem] = {
       val (iLo, iHi) = interval
-      val until = tree.takeWhile(isGteqStart(iLo) _)
+      val until      = tree.takeWhile(isGteqStart(iLo) _)
       new IncludesIterator(until, iHi)
     }
 
@@ -195,6 +218,9 @@ object RangedSeq {
 sealed trait RangedSeq[Elem, P] extends FingerTreeLike[Option[(P, P)], Elem, RangedSeq[Elem, P]] {
   /** Adds a new element to the tree. */
   def +(elem: Elem): RangedSeq[Elem, P]
+
+  /** Removes an element from the tree. */
+  def -(elem: Elem): RangedSeq[Elem, P]
 
   /** Finds an element that overlaps a given interval.
     * An overlap occurs if the intersection between query interval

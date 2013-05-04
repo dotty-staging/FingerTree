@@ -945,7 +945,7 @@ sealed trait FingerTree[ V, +A ] {
   def to[Col[_]](implicit cbf: CanBuildFrom[Nothing, A, Col[A @uV]]): Col[A @uV]
 
   /**
-   * Same as `span1`, but drops the discerning element, instead only returning the left and right tree.
+   * Same as `span1`, but prepends the discerning element to the right tree, returning the left and right tree.
    * Unlike `span1`, this is an allowed operation on an empty tree.
    *
    * @param pred a test function applied to the elements of the tree from left to right, until a

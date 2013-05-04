@@ -16,7 +16,7 @@ The following dependency is necessary:
 
     "de.sciss" %% "fingertree" % v
 
-The current version `v` is `"1.4.+"`.
+The current version `v` is `"1.5.+"`.
 
 ## building
 

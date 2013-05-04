@@ -1,6 +1,6 @@
 name := "FingerTree"
 
-version := "1.4.0"
+version := "1.5.0"
 
 organization := "de.sciss"
 
@@ -10,9 +10,7 @@ homepage <<= name { n => Some(url("https://github.com/Sciss/" + n)) }
 
 licenses := Seq("GPL v2+" -> url("http://www.gnu.org/licenses/gpl-2.0.txt"))
 
-scalaVersion := "2.10.0"
-
-// crossScalaVersions := Seq("2.10.0", "2.9.2")
+scalaVersion := "2.10.1"
 
 scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature")
 
