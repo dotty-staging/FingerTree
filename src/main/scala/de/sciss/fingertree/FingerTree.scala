@@ -2,21 +2,9 @@
  * FingerTree.scala
  * (FingerTree)
  *
- * Copyright (c) 2011-2013 Hanns Holger Rutz. All rights reserved.
+ * Copyright (c) 2011-2014 Hanns Holger Rutz. All rights reserved.
  *
- * This software is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either
- * version 2, june 1991 of the License, or (at your option) any later version.
- *
- * This software is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License (gpl.txt) along with this software; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * This software is published under the GNU Lesser General Public License v3+
  *
  *
  * For further information, please contact Hanns Holger Rutz at
@@ -29,9 +17,7 @@ import collection.generic.CanBuildFrom
 import annotation.unchecked.{uncheckedVariance => uV}
 import language.higherKinds
 
-/**
- * Variant of a finger tree which adds a measure.
- */
+/** Variant of a finger tree which adds a measure. */
 object FingerTree {
   def empty[V, A](implicit m: Measure[A, V]): FingerTree[V, A] = new Empty[V](m.zero)
 
@@ -293,7 +279,7 @@ object FingerTree {
       } else {
         // predicate turns true inside the tree
         val (elem, right) = dropWhile1(pred, m.zero)
-        (elem +: right)
+        elem +: right
       }
 
     def span1(pred: V => Boolean)(implicit m: Measure[A, V]): (Tree, A, Tree) = span1(pred, m.zero)
@@ -484,7 +470,7 @@ object FingerTree {
   // ---- Digits ----
 
   private sealed trait MaybeDigit[V, +A] {
-    protected type Tree = FingerTree[V, A]
+    protected[this] type Tree = FingerTree[V, A]
 
     def isEmpty: Boolean
     def toTree(implicit m: Measure[A, V]): Tree
@@ -493,23 +479,22 @@ object FingerTree {
 
   private final case class Zero[V]() extends MaybeDigit[V, Nothing] {
     def isEmpty = true
-    def toTree(implicit m: Measure[Nothing, V]): Tree = empty[V, Nothing]
+    def toTree(implicit m: Measure[Nothing, V]): Tree = empty[V, Nothing](m)
     def get = throw new UnsupportedOperationException("get")
   }
 
-  private sealed trait Digit[ V, +A ] extends MaybeDigit[ V, A ] {
-    /**
-     * It is an open question whether caching the measurements of digits is preferable or not. As Hinze and
-     * Paterson write: "Because the length of the buffer is bounded by a constant, the number of ‘⊕’ operations
-     * is also bounded. Another possibility is to cache the measure of a digit, adding to the cost of digit
-     * construction but yielding a saving when computing the measure. The choice between these strategies
-     * would depend on the expected balance of query and modification operations, but they would differ only
-     * by a constant factor."
-     *
-     * The advantage of having the measurement stored (as we currently do) is that there is essentially no
-     * difference between `Two` and `Node2` and `Three` and `Node3`, thus we use digits where Hinze and Paterson
-     * use distinguished nodes.
-     */
+  private sealed trait Digit[V, +A] extends MaybeDigit[V, A] {
+    /** It is an open question whether caching the measurements of digits is preferable or not. As Hinze and
+      * Paterson write: "Because the length of the buffer is bounded by a constant, the number of ‘⊕’ operations
+      * is also bounded. Another possibility is to cache the measure of a digit, adding to the cost of digit
+      * construction but yielding a saving when computing the measure. The choice between these strategies
+      * would depend on the expected balance of query and modification operations, but they would differ only
+      * by a constant factor."
+      *
+      * The advantage of having the measurement stored (as we currently do) is that there is essentially no
+      * difference between `Two` and `Node2` and `Three` and `Node3`, thus we use digits where Hinze and Paterson
+      * use distinguished nodes.
+      */
     def measure: V
 
     def head: A
@@ -842,85 +827,75 @@ object FingerTree {
   }
 }
 
-sealed trait FingerTree[ V, +A ] {
+sealed trait FingerTree[V, +A] {
   import FingerTree._
 
-  protected type Tree = FingerTree[V, A]
+  protected[this] type Tree = FingerTree[V, A]
 
-  /**
-   * Queries whether the tree is empty or not
-   *
-   * @return  `true` if the tree is empty
-   */
+  /** Queries whether the tree is empty or not
+    *
+    * @return  `true` if the tree is empty
+    */
   def isEmpty: Boolean
 
-  /**
-   * Queries the measure of the tree, which might be its size or sum
-   *
-   * @return  the measure of the tree
-   */
+  /** Queries the measure of the tree, which might be its size or sum
+    *
+    * @return  the measure of the tree
+    */
   def measure: V
 
-  /**
-   * Returns the first (left-most) element in the tree. Throws a runtime exception if performed on an empty tree.
-   *
-   * @return  the head element
-   */
+  /** Returns the first (left-most) element in the tree. Throws a runtime exception if performed on an empty tree.
+    *
+    * @return  the head element
+    */
   def head: A
 
-  /**
-   * Returns the first (left-most) element in the tree as an option.
-   *
-   * @return  the head element (`Some`), or `None` if the tree is empty
-   */
+  /** Returns the first (left-most) element in the tree as an option.
+    *
+    * @return  the head element (`Some`), or `None` if the tree is empty
+    */
   def headOption: Option[A]
 
-  /**
-   * Returns a copy of the tree with the first (head) element removed. Throws a runtime exception if performed
-   * on an empty tree.
-   *
-   * @param m the measure used to update the tree's structure
-   * @return  the new tree with the first element removed
-   */
+  /** Returns a copy of the tree with the first (head) element removed. Throws a runtime exception if performed
+    * on an empty tree.
+    *
+    * @param m the measure used to update the tree's structure
+    * @return  the new tree with the first element removed
+    */
   def tail(implicit m: Measure[A, V]): Tree
 
-  /**
-   * Returns the last (right-most) element in the tree. Throws a runtime exception if performed on an empty tree.
-   *
-   * @return  the last element
-   */
+  /** Returns the last (right-most) element in the tree. Throws a runtime exception if performed on an empty tree.
+    *
+    * @return  the last element
+    */
   def last: A
 
-  /**
-   * Returns the last (right-most) element in the tree as an option.
-   *
-   * @return  the last element (`Some`), or `None` if the tree is empty
-   */
+  /** Returns the last (right-most) element in the tree as an option.
+    *
+    * @return  the last element (`Some`), or `None` if the tree is empty
+    */
   def lastOption: Option[A]
 
-  /**
-   * Drops the last element of the tree.
-   *
-   * @return  the tree where the last element has been removed
-   */
+  /** Drops the last element of the tree.
+    *
+    * @return  the tree where the last element has been removed
+    */
   def init(implicit m: Measure[A, V]): Tree
 
-  /**
-   * Prepends an element to the tree.
-   *
-   * @param b the element to prepend
-   * @param m the measure used to update the tree's measure
-   * @return  the new tree with the element prepended
-   */
+  /** Prepends an element to the tree.
+    *
+    * @param b the element to prepend
+    * @param m the measure used to update the tree's measure
+    * @return  the new tree with the element prepended
+    */
   def +:[A1 >: A](b: A1)(implicit m: Measure[A1, V]): FingerTree[V, A1]
 
-  /**
-   * Appends an element to the tree.
-   *
-   * @param b the element to append
-   * @param m the measure used to update the tree's structure
-   * @return  the new tree with the element appended
-   */
+  /** Appends an element to the tree.
+    *
+    * @param b the element to append
+    * @param m the measure used to update the tree's structure
+    * @return  the new tree with the element appended
+    */
   def :+[A1 >: A](b: A1)(implicit m: Measure[A1, V]): FingerTree[V, A1]
 
   def ++[A1 >: A](right: FingerTree[V, A1])(implicit m: Measure[A1, V]): FingerTree[V, A1]
@@ -928,77 +903,72 @@ sealed trait FingerTree[ V, +A ] {
   def viewLeft (implicit m: Measure[A, V]): ViewLeft[V, A]
   def viewRight(implicit m: Measure[A, V]): ViewRight[V, A]
 
-  /**
-   * Creates an `Iterator` over the elements of the tree
-   *
-   * @return  a fresh `Iterator` for the tree elements
-   */
+  /** Creates an `Iterator` over the elements of the tree
+    *
+    * @return  a fresh `Iterator` for the tree elements
+    */
   def iterator: Iterator[A]
 
-  /**
-   * Converts the tree to a `List` representation.
-   *
-   * @return  a `List` constructed from the elements in the tree
-   */
+  /** Converts the tree to a `List` representation.
+    *
+    * @return  a `List` constructed from the elements in the tree
+    */
   def toList: List[A]
 
   def to[Col[_]](implicit cbf: CanBuildFrom[Nothing, A, Col[A @uV]]): Col[A @uV]
 
-  /**
-   * Same as `span1`, but prepends the discerning element to the right tree, returning the left and right tree.
-   * Unlike `span1`, this is an allowed operation on an empty tree.
-   *
-   * @param pred a test function applied to the elements of the tree from left to right, until a
-   *             the test returns `false`.
-   * @return  the split tree, as a `Tuple2` with the left and the right tree
-   */
+  /** Same as `span1`, but prepends the discerning element to the right tree, returning the left and right tree.
+    * Unlike `span1`, this is an allowed operation on an empty tree.
+    *
+    * @param pred a test function applied to the elements of the tree from left to right, until a
+    *             the test returns `false`.
+    * @return  the split tree, as a `Tuple2` with the left and the right tree
+    */
   def span(pred: V => Boolean)(implicit m: Measure[A, V]): (Tree, Tree)
 
-  /**
-   * Traverses the tree until a predicate on an element becomes `false`, and then splits the tree,
-   * returning the elements before that element (the prefix for which the predicate holds),
-   * the element itself (the first for which the predicate does not hold), and the remaining elements.
-   *
-   * This method is somewhat analogous to the `span` method in standard Scala collections, the difference
-   * being that the predicate tests the tree's measure and not individual elements.
-   *
-   * Note that the returned discerning element corresponds to the last element in the tree, if
-   * `pred` returns `true` for every element (rather than a runtime exception being thrown).
-   *
-   * If the tree is empty, this throws a runtime exception.
-   *
-   * @param pred a test function applied to the elements of the tree from left to right, until a
-   *             the test returns `true`.
-   * @return  the split tree, as a `Tuple3` with the left tree, the discerning element, and the right tree
-   */
+  /** Traverses the tree until a predicate on an element becomes `false`, and then splits the tree,
+    * returning the elements before that element (the prefix for which the predicate holds),
+    * the element itself (the first for which the predicate does not hold), and the remaining elements.
+    *
+    * This method is somewhat analogous to the `span` method in standard Scala collections, the difference
+    * being that the predicate tests the tree's measure and not individual elements.
+    *
+    * Note that the returned discerning element corresponds to the last element in the tree, if
+    * `pred` returns `true` for every element (rather than a runtime exception being thrown).
+    *
+    * If the tree is empty, this throws a runtime exception.
+    *
+    * @param pred a test function applied to the elements of the tree from left to right, until a
+    *             the test returns `true`.
+    * @return  the split tree, as a `Tuple3` with the left tree, the discerning element, and the right tree
+    */
   def span1(pred: V => Boolean)(implicit m: Measure[A, V]): (Tree, A, Tree)
 
   private[fingertree] def span1(pred: V => Boolean, init: V)(implicit m: Measure[A, V]): (Tree, A, Tree)
 
-  /**
-   * Traverses the tree until a predicate on an element becomes `true`, and then returns that
-   * element. Note that if `pred` returns `false` for every element, the last element in the
-   * tree is returned (rather than a runtime exception being thrown).
-   *
-   * If the tree is empty, this throws a runtime exception.
-   *
-   * @param pred a test function applied to the elements of the tree from left to right, until a
-   *             the test returns `true`.
-   * @return  the discerning element
-   */
+  /** Traverses the tree until a predicate on an element becomes `true`, and then returns that
+    * element. Note that if `pred` returns `false` for every element, the last element in the
+    * tree is returned (rather than a runtime exception being thrown).
+    *
+    * If the tree is empty, this throws a runtime exception.
+    *
+    * @param pred a test function applied to the elements of the tree from left to right, until a
+    *             the test returns `true`.
+    * @return  the discerning element
+    */
   def find1(pred: V => Boolean)(implicit m: Measure[A, V]): (V, A)
 
   private[fingertree] def find1(pred: V => Boolean, init: V)(implicit m: Measure[A, V]): (V, A)
 
   //   /**
-//    * Appends two elements to the tree.
-//    *
-//    * @param b1 the first element to append (this will become the before-last element in the tree)
-//    * @param b2 the second element to append (this will become the last element in the tree)
-//    * @param m the measure used to update the tree's structure
-//    * @return  the new tree with the elements appended
-//    */
-//   def append2[ A1 >: A ]( b1: A1, b2: A1 )( implicit m: Measure[ A1, V ]) : FingerTree[ V, A1 ]
+  //    * Appends two elements to the tree.
+  //    *
+  //    * @param b1 the first element to append (this will become the before-last element in the tree)
+  //    * @param b2 the second element to append (this will become the last element in the tree)
+  //    * @param m the measure used to update the tree's structure
+  //    * @return  the new tree with the elements appended
+  //    */
+  //   def append2[ A1 >: A ]( b1: A1, b2: A1 )( implicit m: Measure[ A1, V ]) : FingerTree[ V, A1 ]
 
   def takeWhile(pred: V => Boolean)(implicit m: Measure[A, V]): Tree
   def dropWhile(pred: V => Boolean)(implicit m: Measure[A, V]): Tree

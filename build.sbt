@@ -8,7 +8,7 @@ description        := "A Scala implementation of the versatile purely functional
 
 homepage           := Some(url("https://github.com/Sciss/" + name.value))
 
-licenses           := Seq("GPL v2+" -> url("http://www.gnu.org/licenses/gpl-2.0.txt"))
+licenses           := Seq("LGPL v3+" -> url("http://www.gnu.org/licenses/lgpl-3.0.txt"))
 
 scalaVersion       := "2.11.0-RC3"
 
