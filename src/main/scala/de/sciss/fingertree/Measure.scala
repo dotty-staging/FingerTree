@@ -18,10 +18,10 @@ object Measure {
     override def toString = "Unit"
 
     val zero = ()
-    def apply(c: Any) {}
+    def apply(c: Any) = ()
 
-    def |+|(a: Unit, b: Unit) {}
-    override def |+|(a: Unit, b: Unit, c: Unit) {}
+    def |+|(a: Unit, b: Unit) = ()
+    override def |+|(a: Unit, b: Unit, c: Unit) = ()
   }
 
   object Indexed extends Measure[Any, Int] {

@@ -6,14 +6,14 @@ object VariousBugs extends App {
       case "--find" => findBug()
    }
 
-   def findBug() {
+   def findBug(): Unit = {
       implicit val m = Measure.Indexed
 //      val r    = 0 to 11
 //      val t    = FingerTree[ Int, Int ]( r: _* )
 //      val res  = t.find1( _ > 7 )
 //      println( res )
 
-      def test( n: Int ) {
+     def test(n: Int): Unit = {
          val r    = 0 to n
          val t    = FingerTree[Int, Int]( r: _* )
          val res  = r.map( i => t.find1( _ > i ))
@@ -25,7 +25,7 @@ object VariousBugs extends App {
       println( "Ok." )
    }
 
-   def initBug() {
+   def initBug(): Unit = {
       implicit val m = Measure.Unit
       val seq1    = FingerTree[ Unit, String ]( "a", "b", "c" )
       val seq1i   = seq1.init

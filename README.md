@@ -16,11 +16,11 @@ The following dependency is necessary:
 
     "de.sciss" %% "fingertree" % v
 
-The current version `v` is `"1.5.+"`.
+The current version `v` is `"1.5.1+"`.
 
 ## building
 
-This builds with Scala 2.10 and sbt 0.12. Standard targets are `compile`, `package`, `doc`, `console`, `test`, `publish-local`.
+This builds with Scala 2.11, 2.10 and sbt 0.13. Standard targets are `compile`, `package`, `doc`, `console`, `test`, `publish-local`.
 
 ## using
 

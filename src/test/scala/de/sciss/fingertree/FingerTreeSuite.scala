@@ -79,7 +79,7 @@ class FingerTreeSuite extends FeatureSpec with GivenWhenThen {
       }
    }
 
-   def scenarioWithTime( name: String, descr: String )( body: => Unit ) {
+  def scenarioWithTime(name: String, descr: String)(body: => Unit): Unit = {
       scenario( descr ) {
          val t1 = System.currentTimeMillis()
          body

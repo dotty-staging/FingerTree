@@ -66,7 +66,7 @@ object FingerTree {
   private def deepConcat[V, A](left: Deep[V, A], mid: List[A], right: Deep[V, A])
                               (implicit m: Measure[A, V]): FingerTree[V, A] = {
 
-    def nodes(xs: List[A]): List[Digit[V, A]] = xs match {
+    def nodes(xs: List[A]): List[Digit[V, A]] = (xs: @unchecked) match {
       case a :: b :: Nil            => Two  (m |+|(m(a), m(b)      ), a, b   ) :: Nil
       case a :: b :: c :: Nil       => Three(m |+|(m(a), m(b), m(c)), a, b, c) :: Nil
       case a :: b :: c :: d :: Nil  => Two  (m |+|(m(a), m(b)      ), a, b   ) ::

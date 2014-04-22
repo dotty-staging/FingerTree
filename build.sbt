@@ -1,6 +1,6 @@
 name               := "FingerTree"
 
-version            := "1.5.1-SNAPSHOT"
+version            := "1.5.1"
 
 organization       := "de.sciss"
 
@@ -10,17 +10,15 @@ homepage           := Some(url("https://github.com/Sciss/" + name.value))
 
 licenses           := Seq("LGPL v3+" -> url("http://www.gnu.org/licenses/lgpl-3.0.txt"))
 
-scalaVersion       := "2.11.0-RC3"
+scalaVersion       := "2.11.0"
 
-crossScalaVersions := Seq("2.11.0-RC3", "2.10.4")
+crossScalaVersions := Seq("2.11.0", "2.10.4")
 
-scalacOptions     ++= Seq("-deprecation", "-unchecked", "-feature")
+scalacOptions     ++= Seq("-deprecation", "-unchecked", "-feature", "-Xfuture")
 
 initialCommands in console := """import de.sciss.fingertree._"""
 
-libraryDependencies in ThisBuild ++= Seq(
-  "org.scalatest" %% "scalatest" % "2.1.2" % "test"
-)
+libraryDependencies in ThisBuild += "org.scalatest" %% "scalatest" % "2.1.3" % "test"
 
 // retrieveManaged := true
 

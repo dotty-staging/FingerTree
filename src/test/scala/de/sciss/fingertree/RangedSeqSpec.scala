@@ -109,7 +109,7 @@ class RangedSeqSpec extends FunSpec {
         assert((r3 - e).to[Set] === elems.filterNot(_ == e).toSet)
       }
       // remove elements successively
-      @tailrec def loop(list: List[Elem], tree: RangedSeq[Elem, Int]) {
+      @tailrec def loop(list: List[Elem], tree: RangedSeq[Elem, Int]): Unit =
         list match {
           case head :: tail =>
             val treeRem = tree - head
@@ -117,7 +117,7 @@ class RangedSeqSpec extends FunSpec {
             loop(tail, treeRem)
           case _ =>
         }
-      }
+
       loop(elems, r3)
     }
   }
