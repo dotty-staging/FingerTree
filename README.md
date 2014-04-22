@@ -4,7 +4,7 @@
 
 FingerTree is an immutable sequence data structure in Scala programming language, offering O(1) prepend and append, as well as a range of other useful properties [^1]. Finger trees can be used as building blocks for queues, double-ended queues, priority queues, indexed and summed sequences.
 
-FingerTree is (C)opyright 2011&ndash;2014 by Hanns Holger Rutz. All rights reserved. It is released under the [GNU Lesser General Public License](https://raw.github.com/Sciss/FingerTree/master/LICENSE) v3+ and comes with absolutely no warranties. To contact the author, send an email to `contact at sciss.de`
+FingerTree is (C)opyright 2011&ndash;2014 by Hanns Holger Rutz. All rights reserved. It is released under the [GNU Lesser General Public License](https://raw.github.com/Sciss/FingerTree/master/LICENSE) v2.1+ and comes with absolutely no warranties. To contact the author, send an email to `contact at sciss.de`
 
 The current implementation is a rewrite of previous versions. It tries to combine the advantages of the finger tree found in Scalaz (mainly the ability to have reducers / measures) and of the finger tree implementation by Daniel Spiewak (small, self-contained, much simpler and faster), but also has a more idiomatic Scala interface and comes with a range of useful applications, such as indexed and summed sequences.
 
@@ -16,7 +16,7 @@ The following dependency is necessary:
 
     "de.sciss" %% "fingertree" % v
 
-The current version `v` is `"1.5.1+"`.
+The current version `v` is `"1.5.2+"`.
 
 ## building
 

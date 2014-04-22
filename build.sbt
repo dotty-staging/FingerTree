@@ -1,6 +1,6 @@
 name               := "FingerTree"
 
-version            := "1.5.1"
+version            := "1.5.2"
 
 organization       := "de.sciss"
 
@@ -8,7 +8,7 @@ description        := "A Scala implementation of the versatile purely functional
 
 homepage           := Some(url("https://github.com/Sciss/" + name.value))
 
-licenses           := Seq("LGPL v3+" -> url("http://www.gnu.org/licenses/lgpl-3.0.txt"))
+licenses           := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-2.1.txt"))
 
 scalaVersion       := "2.11.0"
 
