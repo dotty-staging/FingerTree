@@ -1,5 +1,9 @@
 # FingerTree
 
+[![Flattr this](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=sciss&url=https%3A%2F%2Fgithub.com%2FSciss%2FFingerTree&title=FingerTree&language=Scala&tags=github&category=software)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.sciss/fingertree_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.sciss/fingertree
+_2.11)
+
 ## statement
 
 FingerTree is an immutable sequence data structure in Scala programming language, offering O(1) prepend and append, as well as a range of other useful properties [^1]. Finger trees can be used as building blocks for queues, double-ended queues, priority queues, indexed and summed sequences.
