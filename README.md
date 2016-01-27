@@ -1,6 +1,7 @@
 # FingerTree
 
 [![Flattr this](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=sciss&url=https%3A%2F%2Fgithub.com%2FSciss%2FFingerTree&title=FingerTree&language=Scala&tags=github&category=software)
+[![Build Status](https://travis-ci.org/Sciss/FingerTree.svg?branch=master)](https://travis-ci.org/Sciss/FingerTree)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.sciss/fingertree_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.sciss/fingertree_2.11)
 
 ## statement
@@ -19,11 +20,15 @@ The following dependency is necessary:
 
     "de.sciss" %% "fingertree" % v
 
-The current version `v` is `"1.5.2+"`.
+The current version `v` is `"1.5.2"`.
 
 ## building
 
 This builds with Scala 2.11, 2.10 and sbt 0.13. Standard targets are `compile`, `package`, `doc`, `console`, `test`, `publish-local`.
+
+## contributing
+
+Please see the file [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## using
 
