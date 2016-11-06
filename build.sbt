@@ -1,32 +1,21 @@
 name               := "FingerTree"
-
 version            := "1.5.2"
-
 organization       := "de.sciss"
-
 description        := "A Scala implementation of the versatile purely functional data structure of the same name."
-
-homepage           := Some(url("https://github.com/Sciss/" + name.value))
-
+homepage           := Some(url(s"https://github.com/Sciss/${name.value}"))
 licenses           := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-2.1.txt"))
-
-scalaVersion       := "2.11.0"
-
-crossScalaVersions := Seq("2.11.0", "2.10.4")
+scalaVersion       := "2.12.0"
+crossScalaVersions := Seq("2.12.0", "2.11.8", "2.10.6")
 
 scalacOptions     ++= Seq("-deprecation", "-unchecked", "-feature", "-Xfuture")
 
 initialCommands in console := """import de.sciss.fingertree._"""
 
-libraryDependencies in ThisBuild += "org.scalatest" %% "scalatest" % "2.1.3" % "test"
-
-// retrieveManaged := true
+libraryDependencies in ThisBuild += "org.scalatest" %% "scalatest" % "3.0.0" % "test"
 
 // ---- build info ----
 
-buildInfoSettings
-
-sourceGenerators in Compile <+= buildInfo
+enablePlugins(BuildInfoPlugin)
 
 buildInfoKeys := Seq(name, organization, version, scalaVersion, description,
   BuildInfoKey.map(homepage) { case (k, opt)             => k -> opt.get },
@@ -40,7 +29,7 @@ buildInfoPackage := "de.sciss.fingertree"
 publishMavenStyle := true
 
 publishTo :=
-  Some(if (version.value endsWith "-SNAPSHOT")
+  Some(if (isSnapshot.value)
     "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
   else
     "Sonatype Releases"  at "https://oss.sonatype.org/service/local/staging/deploy/maven2"
@@ -63,13 +52,3 @@ pomExtra := { val n = name.value
   </developer>
 </developers>
 }
-
-// ---- ls.implicit.ly ----
-
-seq(lsSettings :_*)
-
-(LsKeys.tags   in LsKeys.lsync) := Seq("data-structure", "tree", "immutable")
-
-(LsKeys.ghUser in LsKeys.lsync) := Some("Sciss")
-
-(LsKeys.ghRepo in LsKeys.lsync) := Some(name.value)
