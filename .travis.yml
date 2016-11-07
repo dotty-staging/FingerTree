@@ -5,9 +5,12 @@ scala:
   - 2.11.8
   - 2.10.6
 
-jdk:
-  - oraclejdk8
-  - openjdk6
+env:
+  - JDK=openjdk8
+  - JDK=openjdk6
+
+before_script:
+  - jdk_switcher use $JDK
 
 matrix:
   # scala 2.12 requires java 8
