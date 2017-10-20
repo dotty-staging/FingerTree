@@ -1,6 +1,5 @@
 # FingerTree
 
-[![Flattr this](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=sciss&url=https%3A%2F%2Fgithub.com%2FSciss%2FFingerTree&title=FingerTree&language=Scala&tags=github&category=software)
 [![Build Status](https://travis-ci.org/Sciss/FingerTree.svg?branch=master)](https://travis-ci.org/Sciss/FingerTree)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.sciss/fingertree_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.sciss/fingertree_2.12)
 
