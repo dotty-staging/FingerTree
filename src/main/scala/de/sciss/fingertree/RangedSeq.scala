@@ -2,7 +2,7 @@
  * RangedSeq.scala
  * (FingerTree)
  *
- * Copyright (c) 2011-2014 Hanns Holger Rutz. All rights reserved.
+ * Copyright (c) 2011-2018 Hanns Holger Rutz. All rights reserved.
  *
  * This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -18,7 +18,7 @@ import scala.annotation.tailrec
 object RangedSeq {
   def empty[Elem, P](implicit view: Elem => (P, P), ordering: Ordering[P]): RangedSeq[Elem, P] =
     new Impl(view, ordering) {
-      protected val tree = FingerTree.empty[Anno[P], Elem]
+      protected val tree: FingerTree[Anno[P], Elem] = FingerTree.empty
     }
 
   def apply[Elem, P](xs: Elem*)(implicit view: Elem => (P, P), ordering: Ordering[P]): RangedSeq[Elem, P] = {
@@ -52,7 +52,7 @@ object RangedSeq {
     // ---- fingertreelike ----
 
     protected def wrap(_tree: FT[Elem, P]): RangedSeq[Elem, P] = new Impl(view, ordering) {
-      protected val tree = _tree
+      protected val tree: FT[Elem, P] = _tree
     }
 
     // ---- rangedseq ----
@@ -89,7 +89,7 @@ object RangedSeq {
     def findOverlaps(interval: (P, P)): Option[Elem] = {
       val (iLo, iHi) = interval
       tree.measure match {
-        case Some((_, tHi)) if (ordering.lt(iLo, tHi)) =>
+        case Some((_, tHi)) if ordering.lt(iLo, tHi) =>
           // if the search interval's low bound is smaller than the tree's total up bound...
           // "gives us the interval x with the smallest low endpoint
           //  whose high endpoint is at least the low endpoint of the query interval"
@@ -109,7 +109,7 @@ object RangedSeq {
 
     def find(point: P): Option[Elem] =
       tree.measure match {
-        case Some((_, tHi)) if (ordering.lt(point, tHi)) =>
+        case Some((_, tHi)) if ordering.lt(point, tHi) =>
           val x   = tree.find1(isLtStop(point) _)._2
           val xLo = view(x)._1
           if (ordering.lteq(xLo, point)) Some(x) else None
@@ -152,7 +152,7 @@ object RangedSeq {
     }
 
     private sealed abstract class InRangeIterator(init: FingerTree[Anno[P], Elem]) extends Iterator[Elem] {
-      override def toString() =
+      override def toString: String =
         if (hasNext) s"RangedSeq $name-iterator@${hashCode().toHexString}" else "empty iterator"
 
       protected def dropPred(v: Anno[P]): Boolean
@@ -200,7 +200,7 @@ object RangedSeq {
       tree.span(_.map(tup => ordering.lt(tup._1, iLo)).getOrElse(false))
     }
 
-    override def toString = tree.iterator.mkString("RangedSeq(", ", ", ")")
+    override def toString: String = tree.iterator.mkString("RangedSeq(", ", ", ")")
   }
 }
 sealed trait RangedSeq[Elem, P] extends FingerTreeLike[Option[(P, P)], Elem, RangedSeq[Elem, P]] {

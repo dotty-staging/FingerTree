@@ -2,7 +2,7 @@
  * FingerTree.scala
  * (FingerTree)
  *
- * Copyright (c) 2011-2014 Hanns Holger Rutz. All rights reserved.
+ * Copyright (c) 2011-2018 Hanns Holger Rutz. All rights reserved.
  *
  * This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -13,9 +13,8 @@
 
 package de.sciss.fingertree
 
-import collection.generic.CanBuildFrom
-import annotation.unchecked.{uncheckedVariance => uV}
-import language.higherKinds
+import scala.collection.Factory
+import scala.language.higherKinds
 
 /** Variant of a finger tree which adds a measure. */
 object FingerTree {
@@ -109,10 +108,10 @@ object FingerTree {
   // ---- Trees ----
 
   final private case class Single[V, A](measure: V, a: A) extends FingerTree[V, A] {
-    def head = a
+    def head: A = a
     def headOption: Option[A] = Some(a)
 
-    def last = a
+    def last: A = a
     def lastOption: Option[A] = Some(a)
 
     def tail(implicit m: Measure[A, V]): Tree = empty[V, A]
@@ -182,14 +181,16 @@ object FingerTree {
     }
 
     def toList: List[A] = a :: Nil
+
     def iterator: Iterator[A] = Iterator.single(a)
-    def to[Col[_]](implicit cbf: CanBuildFrom[Nothing, A, Col[A @uV]]): Col[A @uV] = {
-      val b = cbf.apply()
+
+    def to[To](factory: Factory[A, To]): To = {
+      val b = factory.newBuilder
       b += a
       b.result()
     }
 
-    override def toString = "(" + a + ")"
+    override def toString = s"($a)"
   }
 
   final private case class Deep[V, +A](measure: V,
@@ -200,10 +201,10 @@ object FingerTree {
 
     def isEmpty = false
 
-    def head = prefix.head
+    def head: A = prefix.head
     def headOption: Option[A] = Some(prefix.head)
 
-    def last = suffix.last
+    def last: A = suffix.last
     def lastOption: Option[A] = Some(suffix.last)
 
     def tail(implicit m: Measure[A, V]): Tree = viewLeft.tail
@@ -368,14 +369,15 @@ object FingerTree {
     }
 
     def toList: List[A] = iterator.toList
-    def to[Col[_]](implicit cbf: CanBuildFrom[Nothing, A, Col[A @uV]]): Col[A @uV] = iterator.to[Col]
+
+    def to[To](factory: Factory[A, To]): To = iterator.to(factory)
 
     def iterator: Iterator[A] = {
       // Iterators compose nicely, ++ and flatMap are still lazy
       prefix.iterator ++ tree.iterator.flatMap(_.iterator) ++ suffix.iterator
     }
 
-    override def toString = "(" + prefix + ", " + tree + ", " + suffix + ")"
+    override def toString = s"($prefix, $tree, $suffix)"
   }
 
   final private case class Empty[V](measure: V) extends FingerTree[V, Nothing] {
@@ -427,7 +429,8 @@ object FingerTree {
     def toList: List[Nothing] = Nil
 
     def iterator: Iterator[Nothing] = Iterator.empty
-    def to[Col[_]](implicit cbf: CanBuildFrom[Nothing, Nothing, Col[Nothing]]): Col[Nothing] = cbf().result()
+
+    def to[To](factory: Factory[Nothing, To]): To = factory.newBuilder.result()
 
     override def toString = "()"
   }
@@ -522,8 +525,8 @@ object FingerTree {
     def isEmpty = false
     def get: Digit[V, A] = this
 
-    def head = a1
-    def last = a1
+    def head: A = a1
+    def last: A = a1
 
     def tail(implicit m: Measure[A, V]): MaybeDigit[V, A] = Zero[V]()
     def init(implicit m: Measure[A, V]): MaybeDigit[V, A] = Zero[V]()
@@ -554,15 +557,15 @@ object FingerTree {
 
     def iterator: Iterator[A] = Iterator.single(a1)
 
-    override def toString = "(" + a1 + ")"
+    override def toString = s"($a1)"
   }
 
   final private case class Two[V, A](measure: V, a1: A, a2: A) extends Digit[V, A] {
     def isEmpty = false
     def get: Digit[V, A] = this
 
-    def head = a1
-    def last = a2
+    def head: A = a1
+    def last: A = a2
 
     def tail(implicit m: Measure[A, V]): MaybeDigit[V, A] = One(m(a2), a2)
     def init(implicit m: Measure[A, V]): MaybeDigit[V, A] = One(m(a1), a1)
@@ -619,15 +622,15 @@ object FingerTree {
 
     def iterator: Iterator[A] = toList.iterator
 
-    override def toString = "(" + a1 + ", " + a2 + ")"
+    override def toString = s"($a1, $a2)"
   }
 
   final private case class Three[V, A](measure: V, a1: A, a2: A, a3: A) extends Digit[V, A] {
     def isEmpty = false
     def get: Digit[V, A] = this
 
-    def head = a1
-    def last = a3
+    def head: A = a1
+    def last: A = a3
 
     def tail(implicit m: Measure[A, V]): MaybeDigit[V, A] = Two(m |+|(m(a2), m(a3)), a2, a3)
     def init(implicit m: Measure[A, V]): MaybeDigit[V, A] = Two(m |+|(m(a1), m(a2)), a1, a2)
@@ -704,15 +707,15 @@ object FingerTree {
 
     def iterator: Iterator[A] = toList.iterator
 
-    override def toString = "(" + a1 + ", " + a2 + ", " + a3 + ")"
+    override def toString = s"($a1, $a2, $a3)"
   }
 
   final private case class Four[V, A](measure: V, a1: A, a2: A, a3: A, a4: A) extends Digit[V, A] {
     def isEmpty = false
     def get: Digit[V, A] = this
 
-    def head = a1
-    def last = a4
+    def head: A = a1
+    def last: A = a4
 
     def tail(implicit m: Measure[A, V]): MaybeDigit[V, A] =
       Three(m |+|(m(a2), m(a3), m(a4)), a2, a3, a4)
@@ -823,7 +826,7 @@ object FingerTree {
 
     def iterator: Iterator[A] = toList.iterator
 
-    override def toString = "(" + a1 + ", " + a2 + ", " + a3 + ", " + a4 + ")"
+    override def toString = s"($a1, $a2, $a3, $a4)"
   }
 }
 
@@ -915,7 +918,7 @@ sealed trait FingerTree[V, +A] {
     */
   def toList: List[A]
 
-  def to[Col[_]](implicit cbf: CanBuildFrom[Nothing, A, Col[A @uV]]): Col[A @uV]
+  def to[To](factory: Factory[A, To]): To
 
   /** Same as `span1`, but prepends the discerning element to the right tree, returning the left and right tree.
     * Unlike `span1`, this is an allowed operation on an empty tree.

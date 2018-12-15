@@ -2,7 +2,7 @@
  * FingerTreeLike.scala
  * (FingerTree)
  *
- * Copyright (c) 2011-2014 Hanns Holger Rutz. All rights reserved.
+ * Copyright (c) 2011-2018 Hanns Holger Rutz. All rights reserved.
  *
  * This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -13,8 +13,8 @@
 
 package de.sciss.fingertree
 
-import collection.generic.CanBuildFrom
-import language.higherKinds
+import scala.collection.generic.CanBuildFrom
+import scala.language.higherKinds
 
 trait FingerTreeLike[V, A, Repr <: FingerTreeLike[V, A, Repr]] {
   protected implicit def m: Measure[A, V]

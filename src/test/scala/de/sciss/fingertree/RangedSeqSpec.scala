@@ -1,6 +1,7 @@
 package de.sciss.fingertree
 
 import org.scalatest.FunSpec
+
 import scala.annotation.tailrec
 
 /**
@@ -106,14 +107,14 @@ class RangedSeqSpec extends FunSpec {
       val r3 = RangedSeq[Elem, Int](elems: _*)
       // remove single elements
       elems.foreach { e =>
-        assert((r3 - e).to[Set] === elems.filterNot(_ == e).toSet)
+        assert((r3 - e).iterator.toSet === elems.filterNot(_ == e).toSet)
       }
       // remove elements successively
       @tailrec def loop(list: List[Elem], tree: RangedSeq[Elem, Int]): Unit =
         list match {
           case head :: tail =>
             val treeRem = tree - head
-            assert(treeRem.to[Set] === tail.toSet)
+            assert(treeRem.iterator.toSet === tail.toSet)
             loop(tail, treeRem)
           case _ =>
         }
