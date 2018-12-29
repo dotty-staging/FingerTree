@@ -10,7 +10,7 @@ append, as well as a range of other useful properties [^1]. Finger trees can be 
 queues, double-ended queues, priority queues, indexed and summed sequences.
 
 FingerTree is (C)opyright 2011&ndash;2018 by Hanns Holger Rutz. All rights reserved. It is released under 
-the [GNU Lesser General Public License](https://raw.github.com/Sciss/FingerTree/master/LICENSE) v2.1+ and comes 
+the [GNU Lesser General Public License](https://git.iem.at/sciss/FingerTree/raw/master/LICENSE) v2.1+ and comes 
 with absolutely no warranties. To contact the author, send an email to `contact at sciss.de`
 
 The current implementation is a rewrite of previous versions. It tries to combine the advantages of the finger 
@@ -27,7 +27,7 @@ The following dependency is necessary:
 
     "de.sciss" %% "fingertree" % v
 
-The current version `v` is `"1.5.2"`.
+The current version `v` is `"1.5.3"`.
 
 ## building
 

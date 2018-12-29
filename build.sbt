@@ -1,12 +1,12 @@
 lazy val baseName  = "FingerTree"
 lazy val baseNameL = baseName.toLowerCase
 
-lazy val projectVersion = "1.5.3-SNAPSHOT"
+lazy val projectVersion = "1.5.3"
 lazy val mimaVersion    = "1.5.1"
 
 lazy val commonSettings = Seq(
   name               := baseName,
-  version            := "1.5.3-SNAPSHOT",
+  version            := projectVersion,
   organization       := "de.sciss",
   description        := "A Scala implementation of the versatile purely functional data structure of the same name.",
   homepage           := Some(url(s"https://git.iem.at/sciss/${name.value}")),
