@@ -44,18 +44,18 @@ object RangedSeq {
     def |+|(a: Anno[P], b: Anno[P]): Anno[P] = (a, b) match {
       case (_, None) => a
       case (None, _) => b
-      case (Some((alo, ahi)), Some((blo, bhi))) => Some((blo, ordering.max(ahi, bhi)))
+      case (Some((_ /* alo */, ahi)), Some((blo, bhi))) => Some((blo, ordering.max(ahi, bhi)))
 
     }
 //    def |+|(a: Anno[P], b: Anno[P], c: Anno[P]): Anno[P]  = |+|(|+|(a, b), c)
 
-    // ---- fingertreelike ----
+    // ---- finger-tree-like ----
 
     protected def wrap(_tree: FT[Elem, P]): RangedSeq[Elem, P] = new Impl(view, ordering) {
       protected val tree: FT[Elem, P] = _tree
     }
 
-    // ---- rangedseq ----
+    // ---- ranged-seq ----
 
     def +(elem: Elem): RangedSeq[Elem, P] = {
       // Should have Interval wrapper that does this check...
@@ -97,7 +97,7 @@ object RangedSeq {
           // Note: n <= MInfty is always false. Since MInfty is equivalent to None
           //     in our implementation, we can write _.map( ... ).getOrElse( false )
           //     for this test
-          val x = tree.find1(isLtStop(iLo) _)._2
+          val x = tree.find1(isLtStop(iLo))._2
           // It then remains to check that low x <= high i
           val xLo = view(x)._1
           // println(s"FIND1 $x; has LO $xLo COMPARRE TO iHi $iHi")
@@ -110,7 +110,7 @@ object RangedSeq {
     def find(point: P): Option[Elem] =
       tree.measure match {
         case Some((_, tHi)) if ordering.lt(point, tHi) =>
-          val x   = tree.find1(isLtStop(point) _)._2
+          val x   = tree.find1(isLtStop(point))._2
           val xLo = view(x)._1
           if (ordering.lteq(xLo, point)) Some(x) else None
 
@@ -119,7 +119,7 @@ object RangedSeq {
 
     def filterIncludes(interval: (P, P)): Iterator[Elem] = {
       val (iLo, iHi) = interval
-      val until      = tree.takeWhile(isGteqStart(iLo) _)
+      val until      = tree.takeWhile(isGteqStart(iLo))
       new IncludesIterator(until, iHi)
     }
 
@@ -127,13 +127,13 @@ object RangedSeq {
       val (iLo, iHi) = interval
 
       // (1) keep only those elements whose start is < query_hi
-      val until = tree.takeWhile(isGtStart(iHi) _)
+      val until = tree.takeWhile(isGtStart(iHi))
       // (2) then we need to keep only those whose stop is > query_lo.
       new OverlapsIterator(until, iLo)
     }
 
     def intersect(point: P): Iterator[Elem] = {
-      val until = tree.takeWhile(isGteqStart(point) _)
+      val until = tree.takeWhile(isGteqStart(point))
       new OverlapsIterator(until, point)
     }
 
@@ -184,20 +184,20 @@ object RangedSeq {
     }
 
     // is the argument less than an element's stop point?
-    @inline private def isLtStop   (k: P)(v: Anno[P]) = v.map(tup => ordering.lt  (k, tup._2)).getOrElse(false)
+    @inline private def isLtStop   (k: P)(v: Anno[P]) = v.exists(tup => ordering.lt(k, tup._2))
     // is the argument greater than an element's start point?
-    @inline private def isGtStart  (k: P)(v: Anno[P]) = v.map(tup => ordering.gt  (k, tup._1)).getOrElse(false)
+    @inline private def isGtStart  (k: P)(v: Anno[P]) = v.exists(tup => ordering.gt(k, tup._1))
     // is the argument greater than or equal to element's start point?
-    @inline private def isGteqStart(k: P)(v: Anno[P]) = v.map(tup => ordering.gteq(k, tup._1)).getOrElse(false)
+    @inline private def isGteqStart(k: P)(v: Anno[P]) = v.exists(tup => ordering.gteq(k, tup._1))
     // is the argument less than or equal to element's stop point?
-    @inline private def isGtStop   (k: P)(v: Anno[P]) = v.map(tup => ordering.gt  (k, tup._2)).getOrElse(false)
+    @inline private def isGtStop   (k: P)(v: Anno[P]) = v.exists(tup => ordering.gt(k, tup._2))
     // is the argument less than or equal to element's stop point?
-    @inline private def isGteqStop (k: P)(v: Anno[P]) = v.map(tup => ordering.gteq(k, tup._2)).getOrElse(false)
+    @inline private def isGteqStop (k: P)(v: Anno[P]) = v.exists(tup => ordering.gteq(k, tup._2))
 
     // "We order the intervals by their low endpoints"
     private def splitTreeAt(interval: (P, P)) = {
       val iLo = interval._1
-      tree.span(_.map(tup => ordering.lt(tup._1, iLo)).getOrElse(false))
+      tree.span(_.exists(tup => ordering.lt(tup._1, iLo)))
     }
 
     override def toString: String = tree.iterator.mkString("RangedSeq(", ", ", ")")

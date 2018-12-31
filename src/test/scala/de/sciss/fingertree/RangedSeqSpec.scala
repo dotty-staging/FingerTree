@@ -95,7 +95,7 @@ class RangedSeqSpec extends FunSpec {
 
     it("should support deletion") {
       type Elem = (Char, Int, Int)
-      implicit val view = (tup: Elem) => (tup._2, tup._3)
+      implicit val view: Elem => (Int, Int) = tup => (tup._2, tup._3)
       val elems = List(
         ('a', 10, 20),
         ('b', 10, 20),

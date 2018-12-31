@@ -14,7 +14,6 @@
 package de.sciss.fingertree
 
 import scala.collection.Factory
-import scala.collection.generic.CanBuildFrom
 import scala.language.higherKinds
 
 trait FingerTreeLike[V, A, Repr <: FingerTreeLike[V, A, Repr]] {
