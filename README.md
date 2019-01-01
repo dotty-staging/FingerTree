@@ -9,7 +9,7 @@ FingerTree is an immutable sequence data structure in Scala programming language
 append, as well as a range of other useful properties [^1]. Finger trees can be used as building blocks for 
 queues, double-ended queues, priority queues, indexed and summed sequences.
 
-FingerTree is (C)opyright 2011&ndash;2018 by Hanns Holger Rutz. All rights reserved. It is released under 
+FingerTree is (C)opyright 2011&ndash;2019 by Hanns Holger Rutz. All rights reserved. It is released under 
 the [GNU Lesser General Public License](https://git.iem.at/sciss/FingerTree/raw/master/LICENSE) v2.1+ and comes 
 with absolutely no warranties. To contact the author, send an email to `contact at sciss.de`
 
@@ -27,7 +27,7 @@ The following dependency is necessary:
 
     "de.sciss" %% "fingertree" % v
 
-The current version `v` is `"1.5.3"`.
+The current version `v` is `"1.5.4"`.
 
 ## building
 
@@ -59,6 +59,9 @@ those structures.
 
 ### Indexed and summed sequence
 
+A sequence that has efficient element look-up (random access), and additionally integrates its elements
+(a running summation).
+
 ```scala
 import de.sciss.fingertree._
 
@@ -69,6 +72,8 @@ sq.sumUntil(sq.size/2)  // result: 55
 ```
 
 ### Ranged sequence
+
+A sequence of elements indexed by intervals. Allows for interval searches such as overlaps and intersections.
 
 ```scala
 import de.sciss.fingertree._
@@ -91,9 +96,23 @@ sq.filterIncludes(1900 -> 1930).names  // were alive during these years: Varèse
 sq.filterOverlaps(1900 -> 1930).names  // were alive at some point of this period: all but Bach
 ```
 
+### Ordered sequence
+
+An ordered sequence that allows to find closest (floor or ceil) elements and create partial iterators.
+
+```scala
+import de.sciss.fingertree._
+
+val sym = Seq(("Cs", 55), ("Fr", 87), ("K", 19), ("Li", 3), ("Na", 11), ("Rb", 37))
+val sq  = OrderedSeq(sym: _*)(_._2, Ordering.Int)
+val li  = sq.toList // List((Li,3), (Na,11), (K,19), (Rb,37), (Cs,55), (Fr,87))
+val ceil20  = sq.ceilIterator  (20).toList  // List((Rb,37), (Cs,55), (Fr,87))
+val floor20 = sq.floorIterator (20).toList  // List((K,19), (Rb,37), (Cs,55), (Fr,87))
+```
+
 ## todo
 
  - efficient bulk loading
- - (an `OrderedSeq` -- less interesting though, because there are already good structures in standard scala collections)
+ - (an max-priority-queue -- less interesting though, because there are already good structures in standard scala collections)
  - proper `equals` and `hashCode` methods
  - `RangedSeq`: element removal

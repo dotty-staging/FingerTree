@@ -1,7 +1,7 @@
 lazy val baseName  = "FingerTree"
 lazy val baseNameL = baseName.toLowerCase
 
-lazy val projectVersion = "1.5.4-SNAPSHOT"
+lazy val projectVersion = "1.5.4"
 lazy val mimaVersion    = "1.5.1"
 
 lazy val commonSettings = Seq(

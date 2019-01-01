@@ -121,5 +121,26 @@ class OrderedSeqSpec extends FunSpec {
         assert (li == cmp)
       }
     }
+
+    it("should allow duplicate insertions") {
+      val inputS  = input.sorted
+      input.foreach { p =>
+        val r2        = r1 + p
+        val res       = r2.toList
+        val cmp       = inputS.patch(inputS.indexOf(p), p :: Nil, 0)
+        assert (res == cmp)
+      }
+    }
+
+    it("should allow to remove all instances of an element") {
+      val inputS  = input.sorted
+      input.foreach { p =>
+        val r2        = r1 + p
+        val r3        = r2.removeAll(p)
+        val res       = r3.toList
+        val cmp       = inputS.patch(inputS.indexOf(p), Nil, 1)
+        assert (res == cmp)
+      }
+    }
   }
 }
