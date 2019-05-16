@@ -11,13 +11,24 @@ lazy val commonSettings = Seq(
   description        := "A Scala implementation of the versatile purely functional data structure of the same name.",
   homepage           := Some(url(s"https://git.iem.at/sciss/${name.value}")),
   licenses           := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-2.1.txt")),
-  scalaVersion       := "2.13.0-M5",
-  crossScalaVersions := Seq("2.12.8", "2.11.12", "2.13.0-M5"),
+  scalaVersion       := "2.12.8",
+  crossScalaVersions := Seq("2.12.8", "2.11.12", "2.13.0-RC2"),
   scalacOptions     ++= Seq("-deprecation", "-unchecked", "-feature", "-Xfuture"),
   initialCommands in console := """import de.sciss.fingertree._""",
   libraryDependencies += {
-    val v = if (scalaVersion.value == "2.13.0-M5") "3.0.6-SNAP5" else "3.0.5"
-    "org.scalatest" %% "scalatest" % v % Test
+    val v = "3.0.8-RC2"
+    if (scalaVersion.value == "2.13.0-RC2") {
+      "org.scalatest" % "scalatest_2.13.0-RC1" % v % Test
+    } else {
+      "org.scalatest" %% "scalatest" % v % Test
+    }
+  },
+  unmanagedSourceDirectories in Compile += {
+    val sourceDir = (sourceDirectory in Compile).value
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, n)) if n >= 13 => sourceDir / "scala-2.13+"
+      case _                       => sourceDir / "scala-2.13-"
+    }
   },
   mimaPreviousArtifacts := Set("de.sciss" %% baseNameL % mimaVersion),
 )
