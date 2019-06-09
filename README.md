@@ -31,7 +31,7 @@ The current version `v` is `"1.5.4"`.
 
 ## building
 
-This builds with Scala 2.12, 2.11, and sbt. Standard targets are `compile`, `package`, `doc`, `console`, `test`, `publish-local`.
+This builds with Scala 2.13, 2.12, 2.11, and sbt. Standard targets are `compile`, `package`, `doc`, `console`, `test`, `publish-local`.
 
 ## contributing
 
