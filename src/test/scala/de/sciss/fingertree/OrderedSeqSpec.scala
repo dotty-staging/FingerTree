@@ -1,11 +1,13 @@
 package de.sciss.fingertree
 
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class OrderedSeqSpec extends FunSpec {
+import scala.collection.immutable.{Seq => ISeq}
+
+class OrderedSeqSpec extends AnyFunSpec {
   describe("An OrderedSeq") {
-    val input = Seq(9, 59, 10, 30, 70)
-    val r1 = OrderedSeq(input: _*)
+    val input = ISeq(9, 59, 10, 30, 70)
+    val r1 = OrderedSeq[Int, Int](input: _*)
 
     it("should be correctly sorted") {
       assert (r1.nonEmpty)

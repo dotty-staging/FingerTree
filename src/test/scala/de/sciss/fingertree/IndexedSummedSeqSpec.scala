@@ -1,11 +1,11 @@
 package de.sciss.fingertree
 
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
 /**
  * test-only de.sciss.fingertree.IndexedSummedSeqSpec
  */
-class IndexedSummedSeqSpec extends FunSpec {
+class IndexedSummedSeqSpec extends AnyFunSpec {
   describe("An IndexedSummedSeq") {
     implicit val m = Measure.SummedIntInt
     val li = (1 to 10).map(i => i * i).toIndexedSeq

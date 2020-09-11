@@ -1,10 +1,10 @@
 package de.sciss.fingertree
 
-import language.implicitConversions
+import scala.language.implicitConversions
 
 object RangedSeqTest extends App {
   object Region {
-    implicit def view(r: Region) = (r.start, r.stop)
+    implicit def view(r: Region): (Int, Int) = (r.start, r.stop)
   }
   case class Region(name: String, start: Int, stop: Int)
   val r0  = RangedSeq.empty[Region, Int]

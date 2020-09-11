@@ -1,7 +1,7 @@
 package de.sciss.fingertree
 
 object ConfluentTest extends App {
-  implicit val m = new Measure[(Int, Int), (Int, Long)] {
+  implicit val m: Measure[(Int, Int), (Int, Long)] = new Measure[(Int, Int), (Int, Long)] {
     def zero = (0, 0L)
     def |+|(a: (Int, Long), b: (Int, Long)) = (a._1 + b._1, a._2 + b._2)
 

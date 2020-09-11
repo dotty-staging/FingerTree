@@ -1,13 +1,13 @@
 package de.sciss.fingertree
 
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
 import scala.annotation.tailrec
 
 /**
  * test-only de.sciss.fingertree.RangedSeqSpec
  */
-class RangedSeqSpec extends FunSpec {
+class RangedSeqSpec extends AnyFunSpec {
   describe("A RangedSeq") {
     val r1 = RangedSeq(
       (9,10),
