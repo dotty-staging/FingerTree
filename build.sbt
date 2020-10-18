@@ -4,6 +4,16 @@ lazy val baseNameL = baseName.toLowerCase
 lazy val projectVersion = "1.5.5"
 lazy val mimaVersion    = "1.5.1"
 
+lazy val deps = new {
+  val test = new {
+    val scalaTest = "3.2.2"
+  }
+}
+
+lazy val commonJvmSettings = Seq(
+  crossScalaVersions := Seq("0.27.0-RC1", "2.13.3", "2.12.12"),
+)
+
 lazy val commonSettings = Seq(
   name               := baseName,
   version            := projectVersion,
@@ -12,15 +22,18 @@ lazy val commonSettings = Seq(
   homepage           := Some(url(s"https://git.iem.at/sciss/${name.value}")),
   licenses           := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-2.1.txt")),
   scalaVersion       := "2.13.3",
-  crossScalaVersions := Seq("0.27.0-RC1", "2.13.3", "2.12.12"),
   scalacOptions     ++= Seq("-deprecation", "-unchecked", "-feature", "-Xlint", "-Xsource:2.13"),
   initialCommands in console := """import de.sciss.fingertree._""",
   libraryDependencies += {
-    "org.scalatest" %% "scalatest" % "3.2.2" % Test
+    "org.scalatest" %%% "scalatest" % deps.test.scalaTest % Test
   },
   unmanagedSourceDirectories in Compile += {
-    val sourceDir = (sourceDirectory in Compile).value
-    CrossVersion.partialVersion(scalaVersion.value) match {
+    val sourceDir0  = (sourceDirectory in Compile).value
+    val sourceDir   = file(
+      sourceDir0.getPath.replace("/jvm/" , "/shared/").replace("/js/", "/shared/")
+    )
+    val sv          = CrossVersion.partialVersion(scalaVersion.value)
+    sv match {
       case Some((2, n)) if n >= 13 => sourceDir / "scala-2.13+"
       case Some((0, _))            => sourceDir / "scala-2.13+"
       case _                       => sourceDir / "scala-2.13-"
@@ -29,9 +42,10 @@ lazy val commonSettings = Seq(
   mimaPreviousArtifacts := Set("de.sciss" %% baseNameL % mimaVersion),
 )
 
-lazy val root = project.withId(baseNameL).in(file("."))
+lazy val root = crossProject(JSPlatform, JVMPlatform).in(file("."))
   .enablePlugins(BuildInfoPlugin)
   .settings(commonSettings)
+  .jvmSettings(commonJvmSettings)
   .settings(publishSettings)
   .settings(
     buildInfoKeys := Seq(name, organization, version, scalaVersion, description,
