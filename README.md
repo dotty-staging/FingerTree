@@ -11,7 +11,7 @@ queues, double-ended queues, priority queues, indexed and summed sequences.
 
 FingerTree is (C)opyright 2011&ndash;2020 by Hanns Holger Rutz. All rights reserved. It is released under 
 the [GNU Lesser General Public License](https://git.iem.at/sciss/FingerTree/raw/main/LICENSE) v2.1+ and comes 
-with absolutely no warranties. To contact the author, send an e-mail to `contact at sciss.de`
+with absolutely no warranties. To contact the author, send an e-mail to `contact at sciss.de`.
 
 The current implementation is a rewrite of previous versions. It tries to combine the advantages of the finger 
 tree found in Scalaz (mainly the ability to have reducers / measures) and of the finger tree implementation by 
@@ -31,8 +31,10 @@ The current version `v` is `"1.5.5"`.
 
 ## building
 
-This builds with Scala 2.13, 2.12, and sbt. Standard targets are `compile`, `package`, `doc`, `console`, `test`, `publish-local`.
+This builds with sbt against Scala 2.13, 2.12, Dotty (JVM) and Scala 2.13 (JS). 
 The last version to support Scala 2.11 is v1.5.4.
+
+Standard targets are `compile`, `package`, `doc`, `console`, `test`, `publishLocal`.
 
 ## contributing
 
